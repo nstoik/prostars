@@ -62,60 +62,16 @@
                     <thead>
                         <tr>
                             <th>Player</th>
-                            <th>
-                                <a href="#" data-toggle="tooltip" title="Games Played">GP</a>
-                            </th>
-                            <th data-hide="phone">
-                                <a href="#" data-toggle="tooltip" title="Goals">G</a>
-                            </th>
-                            <th data-hide="phone">
-                                <a href="#" data-toggle="tooltip" title="Assists">A</a>
-                            </th>
-                            <th>
-                                <a href="#" data-toggle="tooltip" title="Points">P</a>
-                            </th>
-                            <th data-hide="phone, tablet">
-                                <a href="#" data-toggle="tooltip" title="Plus Minus">+/-</a>
-                            </th>
-                            <th data-hide="phone, tablet">
-                                <a href="#" data-toggle="tooltip" title="Penalty Minutes">PIM</a>
-                            </th>
-                            <th data-hide="phone, tablet">
-                                <a href="#" data-toggle="tooltip" title="Points per Game">PPG</a>
-                            </th>
+                            <th>GP</th>
+                            <th data-hide="phone">G</th>
+                            <th data-hide="phone">A</th>
+                            <th>P</th>
+                            <th data-hide="phone, tablet">+/-</th>
+                            <th data-hide="phone, tablet">PIM</th>
+                            <th data-hide="phone, tablet">PPG</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Nelson Stoik</td>
-                            <td>6</td>
-                            <td>4</td>
-                            <td>4</td>
-                            <td>8</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td>Nelson Stoik</td>
-                            <td>2</td>
-                            <td>6</td>
-                            <td>4</td>
-                            <td>25</td>
-                            <td>+5</td>
-                            <td>0</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td>Nelson Stoik</td>
-                            <td>2</td>
-                            <td>5</td>
-                            <td>4</td>
-                            <td>6</td>
-                            <td>-8</td>
-                            <td>56</td>
-                            <td>4</td>
-                        </tr>
                     </tbody>
                 </table>
         </div>
@@ -137,14 +93,37 @@
 
     <!-- Load footable -->
     <script type="text/javascript">
-        $(function () {
-            $('table').footable();
-        });
-    </script>
-    <script>
         $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip(); 
+            $('[data-toggle="tooltip"]').tooltip();
+            $('table').footable();
+            $(function(){
+                load_default(); 
+            });                        
         });
+
+        function create_table_row (item) {
+            var row = $('<tr><td>' + item.player + '</td><td>' + item.gp + '</td><td>' + item.g + '</td><td>' + item.a + '</td><td>' + item.p + '</td><td>' + item.pm + '</td><td>' + item.pim + '</td><td>' + item.ppg + '</td></tr>');
+            return row;
+        }
+
+        function load_default () {
+            $.ajax({
+                url : '/stats/load_default/',
+                data: {  },
+                success : function(data) {
+                    $.each(data.results, function(index, item){
+                        var row = create_table_row(item);
+                        $('table tbody').append(row);
+                    });
+
+                    $('table').trigger('footable_redraw');
+                },
+                error : function(xhr, statusText, error) { 
+                    alert("Error! Could not retrieve the data");
+                }
+            });
+        }
+
     </script>
 
 </body>

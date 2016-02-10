@@ -5,7 +5,7 @@ from oauth2client.client import SignedJwtAssertionCredentials
 
 def connect():
 
-	json_key = json.load(open('Prostars-8ac51a1eb252.json'))
+	json_key = json.load(open('app/Prostars-8ac51a1eb252.json'))
 	scope = ['https://spreadsheets.google.com/feeds']
 	credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 	return gspread.authorize(credentials)

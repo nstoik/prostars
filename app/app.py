@@ -1,6 +1,6 @@
 import os
-from flask import Flask, render_template, jsonify, make_response
-from json import dumps
+from flask import Flask, render_template, jsonify
+from data import fetch_all
 
 app = Flask(__name__)
 app.secret_key = 'mysecretkey'
@@ -17,12 +17,12 @@ def stats():
 def load_default():
 
 	sample_data = [
-		{'player': 'Nelson', 'gp': 1, 'g':1, 'a': 1, 'p': 2, 'pm': '+1', 'pim': 5, 'ppg': 2},
-		{'player': 'Nelson', 'gp': 1, 'g':1, 'a': 1, 'p': 2, 'pm': '+1', 'pim': 5, 'ppg': 2}
+		{'Name': 'Nelson', 'GP': 1, 'G':1, 'A': 1, 'P': 2, 'Plus_Minus': '+1', 'PIM': 5, 'PPG': 2},
+		{'Name': 'Nelson', 'GP': 1, 'G':1, 'A': 1, 'P': 2, 'Plus_Minus': '+1', 'PIM': 5, 'PPG': 2}
 		]
+	all_skaters = fetch_all('Hockey_Stats', 'Skaters')
 
-	return jsonify(results = sample_data)
-	#return dumps(sample_data)
+	return jsonify(row_data = all_skaters)
 
 if __name__ == "__main__":
 

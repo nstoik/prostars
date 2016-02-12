@@ -58,36 +58,42 @@
         <div class="row top-buffer"></div>
         <div class="row">
             <h1>Statistics</h1>
-                <table class="table table-bordered table-striped toggle-circle-filled" data-page-navigation=".pagination" data-limit-navigation="5">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Division</th>
-                            <th data-type="numeric">Year</th>
-                            <th>Season</th>
-                            <th>Night</th>
-                            <th>Gender</th>
-                            <th>Name</th>
-                            <th data-type="numeric">GP</th>
-                            <th data-type="numeric">G</th>
-                            <th data-type="numeric">A</th>
-                            <th data-type="numeric">P</th>
-                            <th data-type="numeric">+/-</th>
-                            <th data-type="numeric">PIM</th>
-                            <th data-type="numeric">PPG</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                    <tfoot class="hide-if-no-paging">
-                        <tr>
-                            <td colspan="42" class="text-center">
-                                <ul class="pagination">
-                                </ul>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+            <table class="table table-bordered table-striped toggle-circle-filled" data-page-navigation=".pagination" data-limit-navigation="5">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Division</th>
+                        <th data-type="numeric">Year</th>
+                        <th>Season</th>
+                        <th>Night</th>
+                        <th>Gender</th>
+                        <th>Name</th>
+                        <th data-type="numeric">GP</th>
+                        <th data-type="numeric">G</th>
+                        <th data-type="numeric">A</th>
+                        <th data-type="numeric">P</th>
+                        <th data-type="numeric">+/-</th>
+                        <th data-type="numeric">PIM</th>
+                        <th data-type="numeric">PPG</th>
+                        <th data-type="numeric">SO_G</th>
+                        <th data-type="numeric">SO_A</th>
+                        <th data-type="numeric">SO_Pct</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <td colspan="42" class="text-center" id="loading-image">
+                        <img src={{ url_for('static', filename='images/loading.gif') }} style="width:128px;height:128px;">
+                    </td>
+                </tbody>
+                <tfoot class="hide-if-no-paging">
+                    <tr>
+                        <td colspan="42" class="text-center">
+                            <ul class="pagination">
+                            </ul>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 
@@ -116,7 +122,7 @@
             });                        
         });
 
-        function create_table_row (item) {
+        function create_table_row_skater (item) {
             var row = $('<tr>' + 
                 '<td>' + item.Type + '</td>' + 
                 '<td>' + item.Division + '</td>' + 
@@ -132,6 +138,9 @@
                 '<td>' + item.Plus_Minus + '</td>' +
                 '<td>' + item.PIM + '</td> ' +
                 '<td>' + item.PPG + '</td>' +
+                '<td>' + item.SO_G + '</td>' +
+                '<td>' + item.SO_A + '</td>' +
+                '<td>' + item.SO_Pct + '</td>' +
                 '</tr>');
             return row;
         }
@@ -140,9 +149,15 @@
             $.ajax({
                 url : '/stats/load_default/',
                 data: {  },
+                beforeSend: function(){
+                    $('#loading-image').show()
+                },
+                complete: function(){
+                    $('#loading-image').hide();
+                },
                 success : function(data) {
                     $.each(data.row_data, function(index, item){
-                        var row = create_table_row(item);
+                        var row = create_table_row_skater(item);
                         $('table tbody').append(row);
                     });
 
@@ -153,9 +168,6 @@
                 }
             });
         }
-
     </script>
-
 </body>
-
 </html>

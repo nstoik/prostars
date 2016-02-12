@@ -20,10 +20,6 @@ def stats():
 @app.route('/stats/load_default/', methods=['GET', 'POST'])
 def load_default():
 
-	sample_data = [
-		{'Name': 'Nelson', 'GP': 1, 'G':1, 'A': 1, 'P': 2, 'Plus_Minus': '+1', 'PIM': 5, 'PPG': 2},
-		{'Name': 'Nelson', 'GP': 1, 'G':1, 'A': 1, 'P': 2, 'Plus_Minus': '+1', 'PIM': 5, 'PPG': 2}
-		]
 	all_skaters = fetch_all('Hockey_Stats', 'Skaters')
 
 	return jsonify(row_data = all_skaters)

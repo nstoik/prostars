@@ -58,7 +58,7 @@
         <div class="row top-buffer"></div>
         <div class="row">
             <h1>Statistics</h1>
-            <table class="table table-bordered table-striped toggle-circle-filled" data-page-navigation=".pagination" data-limit-navigation="5">
+            <table class="table table-bordered table-hover toggle-circle-filled" data-page-navigation=".pagination" data-page-size="10" data-limit-navigation="5">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -99,6 +99,7 @@
 
     <!-- jQuery -->
     <script src={{ url_for("static", filename="js/jquery.js") }}></script>
+    <script src={{ url_for("static", filename="js/jquery.tablehover.js") }}></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src={{ url_for("static", filename="js/bootstrap.min.js") }}></script>
@@ -112,62 +113,23 @@
     <script src={{ url_for("static", filename="js/footable.sort.js") }}></script>
     <script src={{ url_for("static", filename="js/footable.paginate.js") }}></script>
 
+    <script src={{ url_for("static", filename="js/custom.js") }}></script>
+
     <!-- Load footable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();
             $('table').footable();
             $(function(){
-                load_default(); 
+                load_default();
             });                        
         });
 
-        function create_table_row_skater (item) {
-            var row = $('<tr>' + 
-                '<td>' + item.Type + '</td>' + 
-                '<td>' + item.Division + '</td>' + 
-                '<td>' + item.Year + '</td>' + 
-                '<td>' + item.Season + '</td>' + 
-                '<td>' + item.Night + '</td>' + 
-                '<td>' + item.Gender + '</td>' + 
-                '<td>' + item.Name + '</td>' + 
-                '<td>' + item.GP + '</td>' + 
-                '<td>' + item.G + '</td>' +
-                '<td>' + item.A + '</td>' +
-                '<td>' + item.P + '</td>' +
-                '<td>' + item.Plus_Minus + '</td>' +
-                '<td>' + item.PIM + '</td> ' +
-                '<td>' + item.PPG + '</td>' +
-                '<td>' + item.SO_G + '</td>' +
-                '<td>' + item.SO_A + '</td>' +
-                '<td>' + item.SO_Pct + '</td>' +
-                '</tr>');
-            return row;
-        }
-
-        function load_default () {
-            $.ajax({
-                url : '/stats/load_default/',
-                data: {  },
-                beforeSend: function(){
-                    $('#loading-image').show()
-                },
-                complete: function(){
-                    $('#loading-image').hide();
-                },
-                success : function(data) {
-                    $.each(data.row_data, function(index, item){
-                        var row = create_table_row_skater(item);
-                        $('table tbody').append(row);
-                    });
-
-                    $('table').trigger('footable_redraw');
-                },
-                error : function(xhr, statusText, error) { 
-                    alert("Error! Could not retrieve the data " + error);
-                }
-            });
-        }
+        $("#data tr").click(function() {
+            var selected = $(this).hasClass("highlight");
+            $("#data tr").removeClass("highlight");
+            if(!selected)
+                    $(this).addClass("highlight");
+        });
     </script>
 </body>
 </html>

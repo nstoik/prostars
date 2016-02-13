@@ -1,1 +1,11 @@
 .top-buffer { margin-top:80px; }
+
+.table-hover tbody tr:hover td{
+ 	background-color: #80aaff;
+}
+
+.backChange {
+	background-color: #80aaff;
+}
+
+

@@ -1,11 +1,25 @@
-.top-buffer { margin-top:80px; }
+.top-buffer { margin-top:100px; }
 
-.table-hover tbody tr:hover td{
+.table-hover tbody tr:hover {
  	background-color: #80aaff;
 }
+
+
+.dropdown-menu li > a:hover, 
+.dropdown-menu li > a:focus, 
+.dropdown-submenu:hover > a {
+	background-color: #80aaff;
+}
+
 
 .backChange {
 	background-color: #80aaff;
 }
+
+th, tr{
+    white-space: nowrap;
+}
+
+
 
 

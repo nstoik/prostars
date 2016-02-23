@@ -1,3 +1,5 @@
+{% from 'helpers.html' import create_filter with context %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -70,61 +72,31 @@
                 <div id="collapse1" class="panel-collapse collapse">
                     <div class="panel-body">
                         <div class="row">
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Type</h4>
-                                <select id="Type" multiple="multiple">
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Division</h4>
-                                <select id="Division" multiple="multiple">
-                                </select>
-                            </div> 
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Year</h4>
-                                <select id="Year" multiple="multiple">
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Season</h4>
-                                <select id="Season" multiple="multiple">
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Night</h4>
-                                <select id="Night" multiple="multiple">
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
-                                <h4>Gender</h4>
-                                <select id="Gender" multiple="multiple">
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-2">
-                                <h4>Search</h4>
-                                <input id="filter" type="text">
-                            </div>
+                            {{ create_filter("Name") }}
+                            {{ create_filter("Type") }}
+                            {{ create_filter("Division") }}
+                            {{ create_filter("Year") }}
+                            {{ create_filter("Season") }}
+                            {{ create_filter("Night") }}
+                            {{ create_filter("Gender") }}
                         </div>
                     </div>
                     <div class="panel-footer"></div>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-body ">
-                    <h1>Statistics</h1>
+            <div class="row row-spacing">
+            </div>
                     <div style="overflow-x:auto;">
-                    <table class="table table-bordered table-hover toggle-circle-filled" data-page-navigation=".pagination" data-page-size="15" data-limit-navigation="5" data-filter="#filter">
+                    <table class="table table-bordered table-hover table-striped" data-page-navigation=".pagination" data-page-size="15" data-limit-navigation="5">
                         <thead>
                             <tr>
+                                <th>Name</th>
                                 <th>Type</th>
                                 <th>Division</th>
                                 <th data-type="numeric">Year</th>
                                 <th>Season</th>
                                 <th>Night</th>
                                 <th>Gender</th>
-                                <th>Name</th>
                                 <th data-type="numeric">GP</th>
                                 <th data-type="numeric">G</th>
                                 <th data-type="numeric">A</th>
@@ -152,8 +124,6 @@
                         </tfoot>
                     </table>
                     </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -171,7 +141,6 @@
     <script src={{ url_for("static", filename="js/footable.js") }}></script>
     <script src={{ url_for("static", filename="js/footable.sort.js") }}></script>
     <script src={{ url_for("static", filename="js/footable.paginate.js") }}></script>
-    <script src={{ url_for("static", filename="js/footable.filter.js") }}></script>
 
     <!-- Bootstrap Multiselect JavaScript -->
     <script src={{ url_for("static", filename="js/bootstrap-multiselect.js") }}></script>

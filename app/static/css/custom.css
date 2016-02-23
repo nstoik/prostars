@@ -1,5 +1,8 @@
 .top-buffer { margin-top:100px; }
 
+.row-spacing { margin-top:10px; }
+
+/*
 .table-hover tbody tr:hover {
  	background-color: #80aaff;
 }
@@ -15,6 +18,8 @@
 .backChange {
 	background-color: #80aaff;
 }
+
+*/
 
 th, tr{
     white-space: nowrap;

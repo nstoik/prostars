@@ -21,13 +21,13 @@ def fetch_all(spreadsheet_name, worksheet_name):
 
 	return all_data, filter_criteria 
 
-def fetch_filter_criteria_hockey(worksheet):
+def fetch_filter_criteria_hockey(worksheet, pre_selected="true"):
 
 	#used for sorting days of week
 	days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 	filter_criteria = []
-	for x in range(1,7):
+	for x in range(1,8):
 		#get all column data
 		column = worksheet.col_values(x)
 		#remove column name
@@ -45,7 +45,7 @@ def fetch_filter_criteria_hockey(worksheet):
 			select_data['label'] = item
 			select_data['title'] = item
 			select_data['value'] = item
-			select_data['selected'] = 'true'
+			select_data['selected'] = pre_selected
 			filter_data.append(select_data)
 
 		filter_criteria.append(filter_data)

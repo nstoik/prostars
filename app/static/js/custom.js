@@ -6,14 +6,14 @@ function highlight_row(ctrl) {
 }
 
 function create_table_row_skater (item) {
-    var row = $('<tr onClick="highlight_row(this)">' + 
+    var row = $('<tr>' + 
+        '<td>' + item.Name + '</td>' + 
         '<td>' + item.Type + '</td>' + 
         '<td>' + item.Division + '</td>' + 
         '<td>' + item.Year + '</td>' + 
         '<td>' + item.Season + '</td>' + 
         '<td>' + item.Night + '</td>' + 
         '<td>' + item.Gender + '</td>' + 
-        '<td>' + item.Name + '</td>' + 
         '<td>' + item.GP + '</td>' + 
         '<td>' + item.G + '</td>' +
         '<td>' + item.A + '</td>' +
@@ -30,10 +30,28 @@ function create_table_row_skater (item) {
 
 function load_filters (filters) {
     $.each(filters, function(index, outer_item){
-        var select_id = $('#' + outer_item.shift())
-        $(select_id).multiselect({
-            includeSelectAllOption: true
-        });
+        var select_name = outer_item.shift(),
+        select_id = $('#' + select_name)
+        if (outer_item.length > 10) {
+            $(select_id).multiselect({
+                maxHeight: 250,
+                includeSelectAllOption: true,
+                checkboxName: 'multiselect[]',
+                nonSelectedText: 'None Selected',
+                numberDisplayed: 1,
+                enableFiltering: true,
+                enableCaseInsensitiveFiltering: true
+            });
+        }
+        else {
+            $(select_id).multiselect({
+                maxHeight: 250,
+                includeSelectAllOption: true,
+                checkboxName: 'multiselect[]',
+                nonSelectedText: 'None Selected',
+                numberDisplayed: 2,
+            });
+        }
         var options =[]
         $.each(outer_item, function(index, item){
             options.push(item)

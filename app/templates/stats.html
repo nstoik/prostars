@@ -110,9 +110,11 @@
                             </tr>
                         </thead>
                         <tbody>
+                        <!--
                             <td colspan="42" class="text-center" id="loading-image">
                                 <img src={{ url_for('static', filename='images/loading.gif') }} style="width:128px;height:128px;">
                             </td>
+                        -->
                         </tbody>
                         <tfoot class="hide-if-no-paging">
                             <tr>
@@ -152,7 +154,7 @@
         $(document).ready(function(){
             $('table').footable();
             $(function(){
-                load_default();
+                show_players();
             });                        
         });
     </script>

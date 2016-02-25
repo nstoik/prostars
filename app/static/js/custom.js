@@ -62,15 +62,17 @@ function load_filters (filters) {
 
 function load_default () {
     $.ajax({
-        url : '/stats/load_default/',
-        data: {  },
+        url: '/stats/load_default/',
+        type: 'GET',
         beforeSend: function(){
         },
         complete: function(){
-            $('#loading-image').remove();
+            //$('#loading-image').remove();
         },
         success : function(data) {
-            $('#loading-image').remove();
+            //$('#loading-image').remove();
+            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
+            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))            
             $.each(data.row_data, function(index, item){
                 var row = create_table_row_skater(item);
                 $('table tbody').append(row);
@@ -82,4 +84,18 @@ function load_default () {
             alert("Error! Could not retrieve the data " + error);
         }
     });
+}
+
+function show_players () {
+    if ('player_data' in sessionStorage && 'player_filter_criteria' in sessionStorage) {
+        $.each(JSON.parse(sessionStorage.getItem('player_data')), function(index, item){
+            var row = create_table_row_skater(item);
+            $('table tbody').append(row);
+        });    
+        $('table').trigger('footable_redraw');
+        load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
+    }
+    else {
+        load_default()
+    }
 }

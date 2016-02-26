@@ -5,7 +5,7 @@ function highlight_row(ctrl) {
     ctrl.classList.add("backChange");//Add that particular class to classList of element's parent tr
 }
 
-function create_table_row_skater (item) {
+function create_table_row_player (item) {
     var row = $('<tr>' + 
         '<td>' + item.Name + '</td>' + 
         '<td>' + item.Type + '</td>' + 
@@ -65,16 +65,18 @@ function load_default () {
         url: '/stats/load_default/',
         type: 'GET',
         beforeSend: function(){
+            loading.showLoading();
         },
         complete: function(){
             //$('#loading-image').remove();
+            loading.hideLoading();
         },
         success : function(data) {
             //$('#loading-image').remove();
             sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
             sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))            
             $.each(data.row_data, function(index, item){
-                var row = create_table_row_skater(item);
+                var row = create_table_row_player(item);
                 $('table tbody').append(row);
             });    
             $('table').trigger('footable_redraw');
@@ -89,7 +91,7 @@ function load_default () {
 function show_players () {
     if ('player_data' in sessionStorage && 'player_filter_criteria' in sessionStorage) {
         $.each(JSON.parse(sessionStorage.getItem('player_data')), function(index, item){
-            var row = create_table_row_skater(item);
+            var row = create_table_row_player(item);
             $('table tbody').append(row);
         });    
         $('table').trigger('footable_redraw');
@@ -99,3 +101,16 @@ function show_players () {
         load_default()
     }
 }
+
+var loading;
+loading = loading || (function () {
+    return {
+        showLoading: function() {
+            $("#loadingDialog").modal()
+        },
+        hideLoading: function () {
+            $("#loadingDialog").modal('hide')
+        },
+
+    };
+})();

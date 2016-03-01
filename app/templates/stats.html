@@ -84,9 +84,9 @@
                     <div class="panel-footer">
                         <div class="row">
                             <div class="col-sm-12 text-right">
-                                <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="doFunction();" />
-                                <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="doFunction();" />
-                                <input class="btn btn-primary" id="ReloadData" type="button" value="Reload Data" onclick="doFunction();" />
+                                <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter();" />
+                                <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter();" />
+                                <input class="btn btn-primary" id="ReloadData" type="button" value="Reload Data" onclick="reload_data();" />
                             </div>
                         </div>
                     </div>
@@ -95,16 +95,16 @@
             <div class="row row-spacing">
                 
             </div>
-            <div style="overflow-x:auto;">
-                <table class="table table-bordered table-hover table-striped" data-page-navigation=".pagination" data-page-size="15" data-limit-navigation="5">
+            <div class="table-style">
+                <table id="player-table" class="table table-bordered table-striped" data-page-navigation=".pagination" data-page-size="10" data-limit-navigation="5">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Division</th>
+                            <th class="name-width">Name</th>
+                            <th class="type-width">Type</th>
+                            <th class="div-width">Division</th>
                             <th data-type="numeric">Year</th>
                             <th>Season</th>
-                            <th>Night</th>
+                            <th class="night-width">Night</th>
                             <th>Gender</th>
                             <th data-type="numeric">GP</th>
                             <th data-type="numeric">G</th>
@@ -119,11 +119,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                    <!--
-                        <td colspan="42" class="text-center" id="loading-image">
-                            <img src={{ url_for('static', filename='images/loading.gif') }} style="width:128px;height:128px;">
-                        </td>
-                    -->
                     </tbody>
                     <tfoot class="hide-if-no-paging">
                         <tr>
@@ -144,17 +139,15 @@
     
             <!-- Modal content-->
             <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Loading...</h4>
-            </div>
-            <div class="modal-body">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"style="width:100%">
+                <div class="modal-header">
+                    <h4 class="modal-title">Loading...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar"style="width:100%">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-            </div>
             </div>
         </div>
     </div>
@@ -186,7 +179,7 @@
             $('table').footable();
             $(function(){
                 show_players();
-            });                        
+            });             
         });
     </script>
 </body>

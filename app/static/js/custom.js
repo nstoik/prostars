@@ -123,7 +123,7 @@ function reload_data () {
 
 //reset filter data
 function reset_filter () {
-
+    show_players()
 };
 
 //apply the filter choices to the table
@@ -158,6 +158,7 @@ function apply_filter () {
     });
     //if there are no filters to apply, exit
     if (applied_filters.length == 0) {
+        show_players()
         return
     }
     //filter the rows

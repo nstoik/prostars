@@ -6,10 +6,10 @@ th, tr{
     white-space: nowrap;
 }
 /*Freezing first column of table */
-.table-style {
+.table-responsive {
 	overflow-x:auto;
-	table-layout: fixed;
 }
+
 
 /*Spacing for table rows */
 .name-width {

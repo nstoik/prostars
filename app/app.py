@@ -15,7 +15,7 @@ def index():
 
 @app.route('/stats/')
 def stats():
-	return render_template('stats.html')
+	return render_template('hockey_stats.html')
 
 @app.route('/stats/load_default/', methods=['GET', 'POST'])
 def load_default():

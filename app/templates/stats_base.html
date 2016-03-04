@@ -1,5 +1,3 @@
-{% from 'helpers.html' import create_filter with context %}
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -60,78 +58,9 @@
         <!-- /.container -->
     </nav>
 
-    <div class="container">
-        <div class="row top-buffer"></div>
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <a data-toggle="collapse" href="#collapse1">
-                    <div class="panel-heading">
-                        <h3>Filter</h3>
-                    </div>
-                </a>
-                <div id="collapse1" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <div class="row">
-                            {{ create_filter("Name") }}
-                            {{ create_filter("Type") }}
-                            {{ create_filter("Division") }}
-                            {{ create_filter("Year") }}
-                            {{ create_filter("Season") }}
-                            {{ create_filter("Night") }}
-                            {{ create_filter("Gender") }}
-                        </div>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <div class="col-sm-12 text-right">
-                                <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter();" />
-                                <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter();" />
-                                <input class="btn btn-primary" id="ReloadData" type="button" value="Reload Data" onclick="reload_data();" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row row-spacing">
-                
-            </div>
-            <div class="table-responsive">
-                <table id="player-table" class="table table-bordered table-striped table-condensed" data-page-navigation=".pagination" data-page-size="10" data-limit-navigation="5">
-                    <thead>
-                        <tr>
-                            <th class="name-width">Name</th>
-                            <th class="type-width">Type</th>
-                            <th class="div-width">Division</th>
-                            <th data-type="numeric">Year</th>
-                            <th>Season</th>
-                            <th class="night-width">Night</th>
-                            <th>Gender</th>
-                            <th data-type="numeric">GP</th>
-                            <th data-type="numeric">G</th>
-                            <th data-type="numeric">A</th>
-                            <th data-type="numeric">P</th>
-                            <th data-type="numeric">+/-</th>
-                            <th data-type="numeric">PIM</th>
-                            <th data-type="numeric">PPG</th>
-                            <th data-type="numeric">SO_G</th>
-                            <th data-type="numeric">SO_A</th>
-                            <th data-type="numeric">SO_Pct</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                    <tfoot class="hide-if-no-paging">
-                        <tr>
-                            <td colspan="42" class="text-center">
-                                <ul class="pagination">
-                                </ul>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-    </div>
+    <!-- Page contents generated in seperate file -->
+    {% block content %}
+    {% endblock %}
 
     <!-- Modal -->
     <div class="modal fade" id="loadingDialog" role="dialog" data-backdrop="static" data-keyboard="false">

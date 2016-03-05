@@ -76,8 +76,9 @@ function load_default () {
             $.each(data.row_data, function(index, item){
                 var row = create_table_row_player(item);
                 $('table tbody').append(row);
-            });    
-            $('table').trigger('footable_redraw');
+            }); 
+            var table = $('table').DataTable();
+            table.draw();   
             //gather filter meta data
             var filter_metadata = []
             $.each(data.filter_criteria, function(index, item){
@@ -103,7 +104,8 @@ function show_players () {
             var row = create_table_row_player(item);
             $('table tbody').append(row);
         });    
-        $('table').trigger('footable_redraw');
+        var table = $('table').DataTable();
+        table.draw(); 
         load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
     }
     else {
@@ -112,12 +114,13 @@ function show_players () {
 }
 //reload data from the server
 function reload_data () {
-    $('#collapse1').collapse('hide')
+    //$('#collapse1').collapse('hide')
     $("html, body").animate({ scrollTop: 0 }, "slow");
     $("#player-table > tbody").html("");
     load_default()
     //force a redraw   
-    $('table').trigger('footable_redraw');
+    var table = $('table').DataTable();
+    table.draw(); 
             
 };
 
@@ -190,7 +193,8 @@ function apply_filter () {
         var row = create_table_row_player(row_data[i]);
         $('table tbody').append(row); 
     }  
-    $('table').trigger('footable_redraw');
+    var table = $('table').DataTable();
+    table.draw(); 
     
 };
 

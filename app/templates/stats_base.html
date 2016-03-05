@@ -14,11 +14,11 @@
     <!-- Bootstrap Core CSS -->
     <link href={{ url_for('static', filename='css/bootstrap.css') }} rel="stylesheet" type="text/css">
 
-    <!-- Custom CSS -->
+    <!-- Custom CSS For Scrolling Nav -->
     <link href={{ url_for("static", filename="css/scrolling-nav.css") }} rel="stylesheet">
 
-    <!-- Footable CSS -->
-    <link href={{ url_for("static", filename="css/footable.core.css") }} rel="stylesheet" type="text/css">
+    <!-- Datatable CSS -->
+    <link href={{ url_for("static", filename="css/datatables.min.css") }} rel="stylesheet" type="text/css">
 
     <!-- Multiselect CSS -->
     <link href={{ url_for("static", filename="css/bootstrap-multiselect.css") }} rel="stylesheet" type="text/css">
@@ -83,19 +83,17 @@
 
 
     <!-- jQuery -->
-    <script src={{ url_for("static", filename="js/jquery.js") }}></script>
+    <script src={{ url_for("static", filename="js/jquery-2.2.0.min.js") }}></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src={{ url_for("static", filename="js/bootstrap.min.js") }}></script>
+    <script src={{ url_for("static", filename="js/bootstrap.js") }}></script>
 
     <!-- Scrolling Nav JavaScript -->
     <script src={{ url_for("static", filename="js/jquery.easing.min.js") }}></script>
     <script src={{ url_for("static", filename="js/scrolling-nav.js") }}></script>
 
-    <!-- Footable JavaScript -->
-    <script src={{ url_for("static", filename="js/footable.js") }}></script>
-    <script src={{ url_for("static", filename="js/footable.sort.js") }}></script>
-    <script src={{ url_for("static", filename="js/footable.paginate.js") }}></script>
+    <!-- DataTable JavaScript -->
+    <script src={{ url_for("static", filename="js/datatables.min.js") }}></script>
 
     <!-- Bootstrap Multiselect JavaScript -->
     <script src={{ url_for("static", filename="js/bootstrap-multiselect.js") }}></script>
@@ -105,7 +103,7 @@
     <!-- Load footable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            $('table').footable();
+            $('table').DataTable();
             $(function(){
                 show_players();
             });             

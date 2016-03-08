@@ -5,29 +5,6 @@ function highlight_row(ctrl) {
     ctrl.classList.add("backChange");//Add that particular class to classList of element's parent tr
 }
 
-function create_table_row_player (item) {
-    var row = $('<tr>' + 
-        '<td>' + item.Name + '</td>' + 
-        '<td>' + item.Type + '</td>' + 
-        '<td>' + item.Division + '</td>' + 
-        '<td>' + item.Year + '</td>' + 
-        '<td>' + item.Season + '</td>' + 
-        '<td>' + item.Night + '</td>' + 
-        '<td>' + item.Gender + '</td>' + 
-        '<td>' + item.GP + '</td>' + 
-        '<td>' + item.G + '</td>' +
-        '<td>' + item.A + '</td>' +
-        '<td>' + item.P + '</td>' +
-        '<td>' + item.Plus_Minus + '</td>' +
-        '<td>' + item.PIM + '</td> ' +
-        '<td>' + item.PPG + '</td>' +
-        '<td>' + item.SO_G + '</td>' +
-        '<td>' + item.SO_A + '</td>' +
-        '<td>' + item.SO_Pct + '</td>' +
-        '</tr>');
-    return row;
-}
-
 function load_filters (filters) {
     $.each(filters, function(index, outer_item){
         var select_name = outer_item.shift(),
@@ -71,14 +48,7 @@ function load_default () {
         success : function(data) {
             //store data in sessionStorage
             sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
-            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))            
-            //add data to table rows
-            $.each(data.row_data, function(index, item){
-                var row = create_table_row_player(item);
-                $('table tbody').append(row);
-            }); 
-            var table = $('table').DataTable();
-            table.draw();   
+            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))
             //gather filter meta data
             var filter_metadata = []
             $.each(data.filter_criteria, function(index, item){
@@ -89,29 +59,68 @@ function load_default () {
                 filter_metadata.push(temp);
             });
             sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
-            //add filter criteria
-            load_filters(data.filter_criteria)
+            load_table();
+            load_filters(data.filter_criteria);
         },
         error : function(xhr, statusText, error) { 
             alert("Error! Could not retrieve the data " + error);
         }
     });
 }
-
-function show_players () {
-    if ('player_data' in sessionStorage && 'player_filter_criteria' in sessionStorage) {
-        $.each(JSON.parse(sessionStorage.getItem('player_data')), function(index, item){
-            var row = create_table_row_player(item);
-            $('table tbody').append(row);
-        });    
-        var table = $('table').DataTable();
-        table.draw(); 
-        load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
-    }
-    else {
+function get_data () {
+    if (!('player_data' in sessionStorage)) {
         load_default()
+        return false
     }
+    return JSON.parse(sessionStorage.getItem('player_data'))
 }
+
+function load_table() {
+    dataSet = get_data()
+    //if data was not available exit early
+    if (dataSet === false) {
+        return
+    }
+    var t = $('table').DataTable({
+        scrollX: true,
+        //searching: false,
+        fixedColumns:   {
+            leftColumns: 2
+        },
+        data: dataSet,
+        columns: [
+            {   "searchable": false,
+                "orderable": false,
+                "defaultContent": ""
+            },
+            { data: "Name" },
+            { data: "Type" },
+            { data: "Division" },
+            { data: "Year" },
+            { data: "Season" },
+            { data: "Night" },
+            { data: "Gender" },
+            { data: "GP" },
+            { data: "G" },
+            { data: "A" },
+            { data: "P" },
+            { data: "Plus_Minus" },
+            { data: "PIM" },
+            { data: "PPG" },
+            { data: "SO_G" },
+            { data: "SO_A" },
+            { data: "SO_Pct" }
+        ],
+    "order": [[ 1, 'asc' ]]
+    });
+    //for rank column
+    t.on( 'order.dt search.dt', function () {
+        t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+            cell.innerHTML = i+1;
+        });
+    }).draw();    
+}
+
 //reload data from the server
 function reload_data () {
     //$('#collapse1').collapse('hide')

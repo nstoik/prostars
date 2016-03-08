@@ -5,7 +5,7 @@ from oauth2client.client import SignedJwtAssertionCredentials
 
 def connect():
 
-	json_key = json.load(open('app/Prostars-8c71dc0a18ea.json'))
+	json_key = json.load(open('app/Prostars-c02b661b2a77.json'))
 	scope = ['https://spreadsheets.google.com/feeds']
 	credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 	return gspread.authorize(credentials)
@@ -24,7 +24,7 @@ def fetch_all(spreadsheet_name, worksheet_name):
 def fetch_filter_criteria_hockey(worksheet, pre_selected="true"):
 
 	#used for sorting days of week
-	days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+	days = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 	filter_criteria = []
 	for x in range(1,8):

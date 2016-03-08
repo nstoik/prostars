@@ -93,7 +93,7 @@
     <script src={{ url_for("static", filename="js/scrolling-nav.js") }}></script>
 
     <!-- DataTable JavaScript -->
-    <script src={{ url_for("static", filename="js/datatables.min.js") }}></script>
+    <script src={{ url_for("static", filename="js/datatables.js") }}></script>
 
     <!-- Bootstrap Multiselect JavaScript -->
     <script src={{ url_for("static", filename="js/bootstrap-multiselect.js") }}></script>
@@ -103,10 +103,7 @@
     <!-- Load footable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            $('table').DataTable();
-            $(function(){
-                show_players();
-            });             
+            load_table();             
         });
     </script>
 </body>

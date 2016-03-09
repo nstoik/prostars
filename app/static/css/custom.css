@@ -5,32 +5,28 @@
 th, tr{
     white-space: nowrap;
 }
-/*Freezing first column of table */
-.table-responsive {
-	overflow-x:auto;
+table {
+    font-size: 80%;
 }
+
 
 
 /*Spacing for table rows */
 .name-width {
-    max-width: 140px;
-    min-width: 140px;
-    width: 140px;
+    max-width: 100px;
+    min-width: 100px;
+    width: 100px;
 }
 .type-width {
-    max-width: 95px;
-    min-width: 95px;
-    width: 95px;
+    max-width: 59px;
+    min-width: 59px;
+    width: 59px;
 }
 .div-width {
-    max-width: 88px;
-    min-width: 88px;
-    width: 88px;
+    max-width: 100px;
+    min-width: 100px;
+    width: 100px;
 }
-.night-width {
-    max-width: 76px;
-    min-width: 76px;
-    width: 76px;
-}
+
 
 

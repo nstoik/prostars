@@ -9,24 +9,40 @@ function load_filters (filters) {
     $.each(filters, function(index, outer_item){
         var select_name = outer_item.shift(),
         select_id = $('#' + select_name)
-        if (outer_item.length > 10) {
-            $(select_id).multiselect({
-                maxHeight: 250,
-                includeSelectAllOption: true,
-                nonSelectedText: 'None Selected',
-                numberDisplayed: 1,
-                enableFiltering: true,
-                enableCaseInsensitiveFiltering: true
-            });
-        }
-        else {
-            $(select_id).multiselect({
-                maxHeight: 250,
-                includeSelectAllOption: true,
-                nonSelectedText: 'None Selected',
-                numberDisplayed: 2,
-            });
-        }
+
+        $(select_id).multiselect({
+            maxHeight: 250,
+            includeSelectAllOption: true,
+            nSelectedText: select_name,
+            numberDisplayed: 2,
+            buttonText: function(options, select) {
+                var numberOfOptions = $('#'+this.nSelectedText+' option').length;
+                
+                if (options.length === 0) {
+                    return this.nSelectedText;
+                }
+                else if (options.length > this.numberDisplayed) {
+                    return this.nSelectedText + ' (' + options.length + ')';
+                }
+                else if (options.length === numberOfOptions) {
+                    return this.nSelectedText + ' (' + options.length + ')';
+                }
+
+                else {
+                    var labels = [];
+                    options.each(function() {
+                        if ($(this).attr('label') !== undefined) {
+                            labels.push($(this).attr('label'));
+                        }
+                        else {
+                            labels.push($(this).html());
+                        }  
+                    });
+                    return labels.join(', ') + '';
+                }
+            }
+        });
+    
         var options =[]
         $.each(outer_item, function(index, item){
             options.push(item)
@@ -46,10 +62,7 @@ function load_default () {
             loading.hideLoading();
         },
         success : function(data) {
-            //store data in sessionStorage
-            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
-            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))
-            //gather filter meta data
+             //gather filter meta data
             var filter_metadata = []
             $.each(data.filter_criteria, function(index, item){
                 var temp = {
@@ -58,7 +71,13 @@ function load_default () {
                 };
                 filter_metadata.push(temp);
             });
+            //store data in sessionStorage
+            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
+            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))
             sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
+            
+            //load table and filter data. This always needs to be
+            //done in the succes callback
             load_table();
             load_filters(data.filter_criteria);
         },
@@ -70,8 +89,11 @@ function load_default () {
 function get_data () {
     if (!('player_data' in sessionStorage)) {
         load_default()
+        //return early to allow async of data fetch
         return false
     }
+    //we already have the data. Just load filters and return player data
+    load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
     return JSON.parse(sessionStorage.getItem('player_data'))
 }
 
@@ -113,6 +135,7 @@ function load_table() {
         ],
     "order": [[ 1, 'asc' ]]
     });
+
     //for rank column
     t.on( 'order.dt search.dt', function () {
         t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
@@ -123,7 +146,6 @@ function load_table() {
 
 //reload data from the server
 function reload_data () {
-    //$('#collapse1').collapse('hide')
     $("html, body").animate({ scrollTop: 0 }, "slow");
     $("#player-table > tbody").html("");
     load_default()

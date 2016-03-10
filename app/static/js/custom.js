@@ -12,7 +12,6 @@ function load_filters (filters) {
 
         $(select_id).multiselect({
             maxHeight: 250,
-            //buttonClass: 'btn-block',
             includeSelectAllOption: true,
             nSelectedText: select_name,
             numberDisplayed: 2,
@@ -124,6 +123,7 @@ function load_table() {
     var t = $('table').DataTable({
         scrollX: true,
         searching: false,
+        lengthChange: false,
         fixedColumns:   {
             leftColumns: 2
         },

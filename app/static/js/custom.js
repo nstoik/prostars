@@ -12,6 +12,7 @@ function load_filters (filters) {
 
         $(select_id).multiselect({
             maxHeight: 250,
+            //buttonClass: 'btn-block',
             includeSelectAllOption: true,
             nSelectedText: select_name,
             numberDisplayed: 2,
@@ -71,10 +72,12 @@ function load_default () {
                 };
                 filter_metadata.push(temp);
             });
-            //store data in sessionStorage
+            //store data in sessionStorage and set a timestamp
+            sessionStorage.setItem('player_timestamp', JSON.stringify(new Date().getTime()))
             sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
             sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))
             sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
+
             
             //load table and filter data. This always needs to be
             //done in the succes callback
@@ -87,11 +90,26 @@ function load_default () {
     });
 }
 function get_data () {
-    if (!('player_data' in sessionStorage)) {
+    //check if data and timestamp is in sessionStorage
+    if (!('player_data' in sessionStorage && 'player_timestamp' in sessionStorage)) {
+        //something is missing so fetch all data
         load_default()
         //return early to allow async of data fetch
         return false
     }
+    //check timestamp to see if data is still valid
+    //add 15 minutes to timestamp
+    var timestamp = new Date(JSON.parse(sessionStorage.getItem('player_timestamp')) + 15*60000);
+    now = new Date();
+
+    if (now > timestamp){
+        //data is outdated so fetch again
+        console.log('data outdated')
+        load_default()
+        return false
+    }
+
+
     //we already have the data. Just load filters and return player data
     load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
     return JSON.parse(sessionStorage.getItem('player_data'))
@@ -105,7 +123,7 @@ function load_table() {
     }
     var t = $('table').DataTable({
         scrollX: true,
-        //searching: false,
+        searching: false,
         fixedColumns:   {
             leftColumns: 2
         },
@@ -143,17 +161,6 @@ function load_table() {
         });
     }).draw();    
 }
-
-//reload data from the server
-function reload_data () {
-    $("html, body").animate({ scrollTop: 0 }, "slow");
-    $("#player-table > tbody").html("");
-    load_default()
-    //force a redraw   
-    var table = $('table').DataTable();
-    table.draw(); 
-            
-};
 
 //reset filter data
 function reset_filter () {

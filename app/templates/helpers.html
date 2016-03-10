@@ -7,7 +7,7 @@
         </a>
         <div id="collapse1" class="panel-collapse collapse">
             <div class="panel-body">
-                <div class="row">
+                <div class="row no-pad">
                     {{ create_filter("Name") }}
                     {{ create_filter("Type") }}
                     {{ create_filter("Division") }}
@@ -16,13 +16,11 @@
                     {{ create_filter("Night") }}
                     {{ create_filter("Gender") }}
                 </div>
-            </div>
-            <div class="panel-footer">
+                <div class="col-xs-12" style="height:10px;"></div>
                 <div class="row">
                     <div class="col-sm-12 text-right">
                         <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter();" />
                         <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter();" />
-                        <input class="btn btn-primary" id="ReloadData" type="button" value="Reload Data" onclick="reload_data();" />
                     </div>
                 </div>
             </div>
@@ -31,7 +29,7 @@
 {% endmacro -%}
 
 {% macro create_filter(name) -%}
-    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+    <div class="col-lg-2 col-sm-3 col-xs-6">
 	    <select id="{{ name }}" multiple="multiple">
 	    </select>
 	</div>

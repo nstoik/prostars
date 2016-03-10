@@ -5,10 +5,24 @@
 th, tr{
     white-space: nowrap;
 }
-table {
-    font-size: 80%;
-}
 
+@media (max-width: 991px) {
+    /* CSS goes here */
+    table {
+    	font-size: 80%;
+	}
+}
+ .btn-group, .btn-group .multiselect {
+    width: 100% !important;
+}
+.row.no-pad {
+  margin-right:0;
+  margin-left:0;
+}
+.row.no-pad > [class*='col-'] {
+  padding-right:0;
+  padding-left:0;
+}
 
 
 /*Spacing for table rows */

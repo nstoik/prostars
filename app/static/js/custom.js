@@ -1,20 +1,14 @@
-function highlight_row(ctrl) {
-    var elements=document.getElementsByTagName('tr');
-    for(var i=0;i<elements.length;i++)
-        elements[i].classList.remove('backChange'); //remove one particular class from list of classNames in that element
-    ctrl.classList.add("backChange");//Add that particular class to classList of element's parent tr
-}
-
 function load_filters (filters) {
     $.each(filters, function(index, outer_item){
         var select_name = outer_item.shift(),
         select_id = $('#' + select_name)
 
+        //configure multiselect options
         $(select_id).multiselect({
             maxHeight: 250,
             includeSelectAllOption: true,
             nSelectedText: select_name,
-            numberDisplayed: 2,
+            numberDisplayed: 1,
             buttonText: function(options, select) {
                 var numberOfOptions = $('#'+this.nSelectedText+' option').length;
                 
@@ -42,13 +36,57 @@ function load_filters (filters) {
                 }
             }
         });
-    
+        //add all options to the multiselect
         var options =[]
         $.each(outer_item, function(index, item){
             options.push(item)
         });
          $(select_id).multiselect('dataprovider', options);
     });
+}
+
+function load_filter (filter_name, filter_data) {
+    select_id = $('#' + filter_name)
+    //configure multiselect options
+    $(select_id).multiselect({
+        maxHeight: 250,
+        includeSelectAllOption: true,
+        nSelectedText: filter_name,
+        numberDisplayed: 1,
+        buttonText: function(options, select) {
+            var numberOfOptions = $('#'+this.nSelectedText+' option').length;
+            
+            if (options.length === 0) {
+                return this.nSelectedText;
+            }
+            else if (options.length > this.numberDisplayed) {
+                return this.nSelectedText + ' (' + options.length + ')';
+            }
+            else if (options.length === numberOfOptions) {
+                return this.nSelectedText + ' (' + options.length + ')';
+            }
+
+            else {
+                var labels = [];
+                options.each(function() {
+                    if ($(this).attr('label') !== undefined) {
+                        labels.push($(this).attr('label'));
+                    }
+                    else {
+                        labels.push($(this).html());
+                    }  
+                });
+                return labels.join(', ') + '';
+            }
+        }
+    });
+    //add all options to the multiselect
+    var options = [];
+    for (var i=0; i < filter_data.length; i++) {
+        options.push(filter_data[i])
+    }
+    console.log(options)
+    $(select_id).multiselect('dataprovider', options);
 }
 
 function load_default () {
@@ -78,10 +116,8 @@ function load_default () {
             sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
 
             
-            //load table and filter data. This always needs to be
-            //done in the succes callback
+            //load table. This always needs to be done in the succes callback
             load_table();
-            load_filters(data.filter_criteria);
         },
         error : function(xhr, statusText, error) { 
             alert("Error! Could not retrieve the data " + error);
@@ -103,14 +139,12 @@ function get_data () {
 
     if (now > timestamp){
         //data is outdated so fetch again
-        console.log('data outdated')
         load_default()
         return false
     }
 
 
-    //we already have the data. Just load filters and return player data
-    load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
+    //we already have the data. Just return player data
     return JSON.parse(sessionStorage.getItem('player_data'))
 }
 
@@ -124,6 +158,9 @@ function load_table() {
         scrollX: true,
         searching: false,
         lengthChange: false,
+        pageLength: 15,
+        pagingType: "numbers",
+        dom: '<<t>ip>',
         fixedColumns:   {
             leftColumns: 2
         },
@@ -133,13 +170,20 @@ function load_table() {
                 "orderable": false,
                 "defaultContent": ""
             },
-            { data: "Name" },
-            { data: "Type" },
-            { data: "Division" },
-            { data: "Year" },
-            { data: "Season" },
-            { data: "Night" },
-            { data: "Gender" },
+            {   name: "Name",
+                data: "Name" },
+            {   name: "Type",
+                data: "Type" },
+            {   name: "Division",
+                data: "Division" },
+            {   name: "Year",
+                data: "Year" },
+            {   name: "Season",
+                data: "Season" },
+            {   name: "Night",
+                data: "Night" },
+            {   name: "Gender",
+                data: "Gender" },
             { data: "GP" },
             { data: "G" },
             { data: "A" },
@@ -159,7 +203,14 @@ function load_table() {
         t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
             cell.innerHTML = i+1;
         });
-    }).draw();    
+    }).draw();
+    //now configure the multiselect filtering section
+    var items = ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"]
+    for (var i = 0; i < items.length; i++) {
+        var columnName = items[i].concat(':name')
+        var multiselectData = t.column(columnName).data().sort().unique()
+        load_filter(items[i], multiselectData)
+    }  
 }
 
 //reset filter data

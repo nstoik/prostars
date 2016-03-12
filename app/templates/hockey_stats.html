@@ -1,41 +1,57 @@
-{% from 'helpers.html' import create_filter_panel with context %}
+{% from 'helpers.html' import create_filter_section with context %}
 
 {% extends "stats_base.html" %}
 {% block content %}
-    <div class="container">
-        <div class="row top-buffer"></div>
-        <div class="panel-group">
-            {{ create_filter_panel('hockey_player') }}
-            <div class="row row-spacing">
-            </div>
-            <div class="table-responsive">
-                <table id="player-table" class="table table-bordered table-striped table-condensed">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Division</th>
-                            <th>Year</th>
-                            <th>Season</th>
-                            <th>Night</th>
-                            <th>Gender</th>
-                            <th>GP</th>
-                            <th>G</th>
-                            <th>A</th>
-                            <th>P</th>
-                            <th>+/-</th>
-                            <th>PIM</th>
-                            <th>PPG</th>
-                            <th>SO_G</th>
-                            <th>SO_A</th>
-                            <th>SO_Pct</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    
+<div class="row top-buffer"></div>
+<ul class="nav nav-pills nav-justified">
+	<li class="active">
+		<a data-toggle="pill" href="#players">Players</a>
+	</li>
+	<li>
+		<a data-toggle="pill" href="#goalies">Goalies</a>
+	</li>
+</ul>
+<div class="container">
+		<div class="tab-content">
+  			<div id="players" class="tab-pane fade in active">
+  			<h3>Player Stats</h3>
+		        {{ create_filter_section('hockey_player') }}
+		        <div class="row row-spacing">
+		        </div>
+		        <div class="table-responsive">
+		            <table id="player-table" class="table table-bordered table-striped table-condensed">
+		                <thead>
+		                    <tr>
+		                        <th>#</th>
+		                        <th>Name</th>
+		                        <th>Type</th>
+		                        <th>Division</th>
+		                        <th>Year</th>
+		                        <th>Season</th>
+		                        <th>Night</th>
+		                        <th>Gender</th>
+		                        <th>GP</th>
+		                        <th>G</th>
+		                        <th>A</th>
+		                        <th>P</th>
+		                        <th>+/-</th>
+		                        <th>PIM</th>
+		                        <th>PPG</th>
+		                        <th>SO_G</th>
+		                        <th>SO_A</th>
+		                        <th>SO_Pct</th>
+		                    </tr>
+		                </thead>
+		                <tbody>
+		                </tbody>
+		            </table>
+		        </div>
+  			</div>
+  			<div id="goalies" class="tab-pane fade">
+  			<h3>Goalie Stats</h3>
+
+  			</div>
+		</div>
     </div>
 {% endblock %}

@@ -1,49 +1,5 @@
-function load_filters (filters) {
-    $.each(filters, function(index, outer_item){
-        var select_name = outer_item.shift(),
-        select_id = $('#' + select_name)
-
-        //configure multiselect options
-        $(select_id).multiselect({
-            maxHeight: 250,
-            includeSelectAllOption: true,
-            nSelectedText: select_name,
-            numberDisplayed: 1,
-            buttonText: function(options, select) {
-                var numberOfOptions = $('#'+this.nSelectedText+' option').length;
-                
-                if (options.length === 0) {
-                    return this.nSelectedText;
-                }
-                else if (options.length > this.numberDisplayed) {
-                    return this.nSelectedText + ' (' + options.length + ')';
-                }
-                else if (options.length === numberOfOptions) {
-                    return this.nSelectedText + ' (' + options.length + ')';
-                }
-
-                else {
-                    var labels = [];
-                    options.each(function() {
-                        if ($(this).attr('label') !== undefined) {
-                            labels.push($(this).attr('label'));
-                        }
-                        else {
-                            labels.push($(this).html());
-                        }  
-                    });
-                    return labels.join(', ') + '';
-                }
-            }
-        });
-        //add all options to the multiselect
-        var options =[]
-        $.each(outer_item, function(index, item){
-            options.push(item)
-        });
-         $(select_id).multiselect('dataprovider', options);
-    });
-}
+//Global Variables
+var filter_items = ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"]
 
 function load_filter (filter_name, filter_data) {
     select_id = $('#' + filter_name)
@@ -53,6 +9,7 @@ function load_filter (filter_name, filter_data) {
         includeSelectAllOption: true,
         nSelectedText: filter_name,
         numberDisplayed: 1,
+        //this function is for the text on the buttons
         buttonText: function(options, select) {
             var numberOfOptions = $('#'+this.nSelectedText+' option').length;
             
@@ -83,9 +40,13 @@ function load_filter (filter_name, filter_data) {
     //add all options to the multiselect
     var options = [];
     for (var i=0; i < filter_data.length; i++) {
-        options.push(filter_data[i])
+        select_data = {}
+        select_data['label'] = filter_data[i]
+        select_data['title'] = filter_data[i]
+        select_data['value'] = filter_data[i]
+        select_data['selected'] = 'true'
+        options.push(select_data)
     }
-    console.log(options)
     $(select_id).multiselect('dataprovider', options);
 }
 
@@ -100,22 +61,9 @@ function load_default () {
             loading.hideLoading();
         },
         success : function(data) {
-             //gather filter meta data
-            var filter_metadata = []
-            $.each(data.filter_criteria, function(index, item){
-                var temp = {
-                    'item_name': item[0],
-                    'total_options': item.length - 1
-                };
-                filter_metadata.push(temp);
-            });
             //store data in sessionStorage and set a timestamp
             sessionStorage.setItem('player_timestamp', JSON.stringify(new Date().getTime()))
-            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
-            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))
-            sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
-
-            
+            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))                      
             //load table. This always needs to be done in the succes callback
             load_table();
         },
@@ -132,7 +80,7 @@ function get_data () {
         //return early to allow async of data fetch
         return false
     }
-    //check timestamp to see if data is still valid
+    //else check timestamp to see if data is still valid
     //add 15 minutes to timestamp
     var timestamp = new Date(JSON.parse(sessionStorage.getItem('player_timestamp')) + 15*60000);
     now = new Date();
@@ -142,24 +90,25 @@ function get_data () {
         load_default()
         return false
     }
-
-
+    //all checks are good
     //we already have the data. Just return player data
     return JSON.parse(sessionStorage.getItem('player_data'))
 }
 
 function load_table() {
     dataSet = get_data()
-    //if data was not available exit early
+    //if data was not available exit early while ajax fetches data
     if (dataSet === false) {
         return
     }
+    //have data. now setup
     var t = $('table').DataTable({
         scrollX: true,
         searching: false,
         lengthChange: false,
         pageLength: 15,
         pagingType: "numbers",
+        retrieve: true,
         dom: '<<t>ip>',
         fixedColumns:   {
             leftColumns: 2
@@ -205,11 +154,10 @@ function load_table() {
         });
     }).draw();
     //now configure the multiselect filtering section
-    var items = ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"]
-    for (var i = 0; i < items.length; i++) {
-        var columnName = items[i].concat(':name')
+    for (var i = 0; i < filter_items.length; i++) {
+        var columnName = filter_items[i].concat(':name')
         var multiselectData = t.column(columnName).data().sort().unique()
-        load_filter(items[i], multiselectData)
+        load_filter(filter_items[i], multiselectData)
     }  
 }
 
@@ -220,13 +168,9 @@ function reset_filter () {
 
 //apply the filter choices to the table
 function apply_filter () {
-
-    
     var applied_filters = []
-    //get the applied filters
-    filter_metadata = JSON.parse(sessionStorage.getItem('player_filter_metadata'))
-    $.each(filter_metadata, function(index, item){
-        var select_name = item.item_name
+    for (var i = 0; i < filter_items.length; i++) {
+        var select_name = filter_items[i]
         var selectedOptionValue = $("#" + select_name + " option:selected")
         
         //make sure at least one option is selected
@@ -234,56 +178,28 @@ function apply_filter () {
             alert("You need to select at least one item for: " + select_name)
             return false
         }
-        //skip selection if all items are selected
-        if (selectedOptionValue.length == item.total_options) {
-            return
-        }
         //gather the options selected
         var single_filter = {
             'item_name': select_name,
             'selected_options' : []
         }
-        for (var i = 0; i < selectedOptionValue.length; i++) {
-            single_filter.selected_options.push(selectedOptionValue[i].value)
+        for (var j = 0; j < selectedOptionValue.length; j++) {
+            single_filter.selected_options.push(selectedOptionValue[j].value)
         }
         applied_filters.push(single_filter)
-    });
+    }
     //if there are no filters to apply, exit
     if (applied_filters.length == 0) {
-        show_players()
         return
     }
     //filter the rows
-    row_data = JSON.parse(sessionStorage.getItem('player_data'))
-    rows_to_remove = []
-    //for each row of data
-    for (var r = 0; r < row_data.length; r++) {
-        //for each filter in applied filters
-        for (var f = 0; f < applied_filters.length; f++){
-            filter_name = applied_filters[f].item_name
-            filter_options = applied_filters[f].selected_options
-            //chech if the data from the row is in the filter
-            if (filter_options.indexOf(row_data[r][filter_name].toString()) == -1) {
-                rows_to_remove.push(r)
-                break
-            }
-            
-        }
-    }
-    //now remove all the rows that need to be
-    //need to traverse the array backwards
-    for (var i = rows_to_remove.length - 1; i >= 0; i--) {
-        row_data.splice(rows_to_remove[i],1)
-    }
+    console.log(applied_filters)
 
-    //show rows
-    $("#player-table > tbody").html("");
-    for (var i = 0; i < row_data.length; i++) {
-        var row = create_table_row_player(row_data[i]);
-        $('table tbody').append(row); 
-    }  
+    // DataTable
     var table = $('table').DataTable();
-    table.draw(); 
+    console.log(table)
+ 
+    // Apply the search
     
 };
 

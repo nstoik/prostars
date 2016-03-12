@@ -103,7 +103,11 @@
     <!-- Load datatable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            load_table();             
+            load_table();
+            $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+                var target = $(e.target).attr("href") // activated tab
+                alert(target);
+            });             
         });
     </script>
 </body>

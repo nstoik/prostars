@@ -16,6 +16,7 @@ th, tr{
 
 /* pil color */
 .nav-pills>li>a {
+  font-size: large;
   border-style: solid;
   border-width: 1px;
   border-color: #d9d9d9;
@@ -65,22 +66,6 @@ th, tr{
 }
 
 
-/*Spacing for table rows */
-.name-width {
-    max-width: 100px;
-    min-width: 100px;
-    width: 100px;
-}
-.type-width {
-    max-width: 59px;
-    min-width: 59px;
-    width: 59px;
-}
-.div-width {
-    max-width: 100px;
-    min-width: 100px;
-    width: 100px;
-}
 
 
 

@@ -20,8 +20,8 @@ def stats():
 @app.route('/stats/load_default/', methods=['GET', 'POST'])
 def load_default():
 
-	all_players, filter_player = fetch_all('Hockey_Stats', 'Players')
-	return jsonify(row_data = all_players, filter_criteria = filter_player)
+	all_players = fetch_all('Hockey_Stats', 'Players')
+	return jsonify(row_data = all_players)
 
 
 if __name__ == "__main__":

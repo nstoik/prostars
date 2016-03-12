@@ -17,9 +17,8 @@ def fetch_all(spreadsheet_name, worksheet_name):
 	worksheet = spreadsheet.worksheet(worksheet_name)
 
 	all_data = worksheet.get_all_records(empty2zero = True)
-	filter_criteria = fetch_filter_criteria_hockey(worksheet)
 
-	return all_data, filter_criteria 
+	return all_data
 
 def fetch_filter_criteria_hockey(worksheet, pre_selected="true"):
 

@@ -1,13 +1,163 @@
 //Global Variables
 var filter_items = ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"]
 
-function load_filter (filter_name, filter_data) {
-    select_id = $('#' + filter_name)
+var player_table = null
+var player_config = [
+            {   "searchable": false,
+                "orderable": false,
+                "defaultContent": ""
+            },
+            {   name: "Name",
+                data: "Name" },
+            {   name: "Type",
+                data: "Type" },
+            {   name: "Division",
+                data: "Division" },
+            {   name: "Year",
+                data: "Year" },
+            {   name: "Season",
+                data: "Season" },
+            {   name: "Night",
+                data: "Night" },
+            {   name: "Gender",
+                data: "Gender" },
+            { data: "GP" },
+            { data: "G" },
+            { data: "A" },
+            { data: "P" },
+            { data: "Plus_Minus" },
+            { data: "PIM" },
+            { data: "PPG" },
+            { data: "SO_G" },
+            { data: "SO_A" },
+            { data: "SO_Pct" }
+        ]
+
+var goalie_table = null
+var goalie_config = [
+            {   "searchable": false,
+                "orderable": false,
+                "defaultContent": ""
+            },
+            {   name: "Name",
+                data: "Name" },
+            {   name: "Type",
+                data: "Type" },
+            {   name: "Division",
+                data: "Division" },
+            {   name: "Year",
+                data: "Year" },
+            {   name: "Season",
+                data: "Season" },
+            {   name: "Night",
+                data: "Night" },
+            {   name: "Gender",
+                data: "Gender" },
+            { data: "GP" },
+            { data: "W" },
+            { data: "L" },
+            { data: "T" },
+            { data: "GA" },
+            { data: "GAA" },
+            { data: "SO" },
+            { data: "SO_GA" },
+            { data: "SO_Sv" },
+            { data: "SO_SvPct" },
+            {   data: "G",
+                "visible": false,
+                "searchable": false },
+            {   data: "A",
+                "visible": false,
+                "searchable": false },
+            {   data: "P",
+                "visible": false,
+                "searchable": false },
+            {   data: "PIM",
+                "visible": false,
+                "searchable": false },
+            {   data: "PPG",
+                "visible": false,
+                "searchable": false },
+        ]
+
+/*load the table with 'table_id'.
+*This includes Datatables and Multiselect
+*for each table
+*/
+function load_table(table_id) {
+    dataSet = get_data(table_id)
+    //if data was not available exit early while ajax fetches data
+    if (dataSet === false) {
+        return
+    }
+    //get correct config values
+    switch(table_id) {
+    case '#players-table':
+        table_config = player_config;
+        break;
+    case '#goalies-table':
+        table_config = goalie_config;
+        break;
+    default:
+        alert('load_table() config switch error')
+    }
+    //have data. now setup
+    var t = $(table_id).DataTable({
+        scrollX: true,
+        lengthChange: false,
+        pageLength: 15,
+        pagingType: "numbers",
+        retrieve: true,
+        dom: '<<t>ip>',
+        fixedColumns:   {
+            leftColumns: 2
+        },
+        "search": {
+            "caseInsensitive": false
+        },
+        data: dataSet,
+        columns: table_config,
+    "order": [[ 1, 'asc' ]]
+    });
+
+    //for rank column
+    t.on( 'order.dt search.dt', function () {
+        t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+            cell.innerHTML = i+1;
+        });
+    }).draw();
+    //store the table in the correct global variable
+    switch(table_id) {
+    case '#players-table':
+        player_table = t;
+        break;
+    case '#goalies-table':
+        goalie_table = t;
+        break;
+    default:
+        alert('load_table() store switch error')
+    }
+    
+    //now configure the multiselect filtering section
+    for (var i = 0; i < filter_items.length; i++) {
+        var columnName = filter_items[i].concat(':name')
+        var multiselectData = t.column(columnName).data().sort().unique()
+        //create the filter name from the table_id and filter_id
+        filter_name = table_id.split("-")[0].concat('-filter #').concat(filter_items[i])
+        button_name = filter_items[i]
+        //load the filter
+        load_filter(filter_name, multiselectData, button_name)
+    }  
+}
+
+/*load the filter for multiselect
+*/
+function load_filter (filter_name, filter_data, button_name) {
     //configure multiselect options
-    $(select_id).multiselect({
+    $(filter_name).multiselect({
         maxHeight: 250,
         includeSelectAllOption: true,
-        nSelectedText: filter_name,
+        nSelectedText: button_name,
         numberDisplayed: 1,
         //this function is for the text on the buttons
         buttonText: function(options, select) {
@@ -47,13 +197,71 @@ function load_filter (filter_name, filter_data) {
         select_data['selected'] = 'true'
         options.push(select_data)
     }
-    $(select_id).multiselect('dataprovider', options);
+    $(filter_name).multiselect('dataprovider', options);
 }
 
-function load_default () {
+/*get the data for a given table
+*Data is in sessionStorage
+*If data is expired, or not present, load_default
+*is called to fetch from server
+*/
+function get_data (table_id) {
+    //set appropriate variables based on table_id
+    switch(table_id) {
+    case '#players-table':
+        session_data = 'player_data'
+        session_timestamp = 'player_timestamp'
+        break;
+    case '#goalies-table':
+        session_data = 'goalie_data'
+        session_timestamp = 'goalie_timestamp'
+        break;
+    default:
+        alert('get_data() switch error')
+    }
+    //check if data and timestamp is in sessionStorage
+    if (!(session_data in sessionStorage && session_timestamp in sessionStorage)) {
+        //something is missing so fetch all data
+        load_default(table_id)
+        //return early to allow async of data fetch
+        return false
+    }
+    //else check timestamp to see if data is still valid
+    //add 15 minutes to timestamp
+    var timestamp = new Date(JSON.parse(sessionStorage.getItem(session_timestamp)) + 15*60000);
+    now = new Date();
+
+    if (now > timestamp){
+        //data is outdated so fetch again
+        load_default(table_id)
+        return false
+    }
+    //all checks are good
+    //we already have the data. Just return data
+    return JSON.parse(sessionStorage.getItem(session_data))
+}
+/*load data for table_id from server
+*load_table is called for the table_id after finishing
+*/
+function load_default (table_id) {
+    switch(table_id) {
+    case '#players-table':
+        session_data = 'player_data'
+        session_timestamp = 'player_timestamp'
+        break;
+    case '#goalies-table':
+        session_data = 'goalie_data'
+        session_timestamp = 'goalie_timestamp'
+        break;
+    default:
+        alert('load_default() switch error')
+    }
     $.ajax({
         url: '/stats/load_default/',
-        type: 'GET',
+        data: { 
+        'table_id': table_id
+        },
+        type: 'POST',
         beforeSend: function(){
             loading.showLoading();
         },
@@ -62,117 +270,51 @@ function load_default () {
         },
         success : function(data) {
             //store data in sessionStorage and set a timestamp
-            sessionStorage.setItem('player_timestamp', JSON.stringify(new Date().getTime()))
-            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))                      
-            //load table. This always needs to be done in the succes callback
-            load_table();
+            sessionStorage.setItem(session_timestamp, JSON.stringify(new Date().getTime()))
+            sessionStorage.setItem(session_data, JSON.stringify(data.row_data))           
+            //load table. This always needs to be done in the success callback. Get table_id from server data
+            server_tableID = JSON.stringify(data.table_id).replace(/['"]+/g, '')         
+            load_table(server_tableID);
         },
         error : function(xhr, statusText, error) { 
             alert("Error! Could not retrieve the data " + error);
         }
     });
 }
-function get_data () {
-    //check if data and timestamp is in sessionStorage
-    if (!('player_data' in sessionStorage && 'player_timestamp' in sessionStorage)) {
-        //something is missing so fetch all data
-        load_default()
-        //return early to allow async of data fetch
-        return false
-    }
-    //else check timestamp to see if data is still valid
-    //add 15 minutes to timestamp
-    var timestamp = new Date(JSON.parse(sessionStorage.getItem('player_timestamp')) + 15*60000);
-    now = new Date();
 
-    if (now > timestamp){
-        //data is outdated so fetch again
-        load_default()
-        return false
-    }
-    //all checks are good
-    //we already have the data. Just return player data
-    return JSON.parse(sessionStorage.getItem('player_data'))
-}
 
-function load_table() {
-    dataSet = get_data()
-    //if data was not available exit early while ajax fetches data
-    if (dataSet === false) {
-        return
+//reset filter data
+function reset_filter (filter_id) {
+    //get the  table
+    switch(filter_id) {
+    case 'players-filter':
+        table = player_table;
+        break;
+    case 'goalies-filter':
+        table = goalie_table;
+        break;
+    default:
+        alert('apply_filter() switch error')
     }
-    //have data. now setup
-    var t = $('table').DataTable({
-        scrollX: true,
-        searching: false,
-        lengthChange: false,
-        pageLength: 15,
-        pagingType: "numbers",
-        retrieve: true,
-        dom: '<<t>ip>',
-        fixedColumns:   {
-            leftColumns: 2
-        },
-        data: dataSet,
-        columns: [
-            {   "searchable": false,
-                "orderable": false,
-                "defaultContent": ""
-            },
-            {   name: "Name",
-                data: "Name" },
-            {   name: "Type",
-                data: "Type" },
-            {   name: "Division",
-                data: "Division" },
-            {   name: "Year",
-                data: "Year" },
-            {   name: "Season",
-                data: "Season" },
-            {   name: "Night",
-                data: "Night" },
-            {   name: "Gender",
-                data: "Gender" },
-            { data: "GP" },
-            { data: "G" },
-            { data: "A" },
-            { data: "P" },
-            { data: "Plus_Minus" },
-            { data: "PIM" },
-            { data: "PPG" },
-            { data: "SO_G" },
-            { data: "SO_A" },
-            { data: "SO_Pct" }
-        ],
-    "order": [[ 1, 'asc' ]]
-    });
-
-    //for rank column
-    t.on( 'order.dt search.dt', function () {
-        t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-            cell.innerHTML = i+1;
-        });
-    }).draw();
     //now configure the multiselect filtering section
     for (var i = 0; i < filter_items.length; i++) {
         var columnName = filter_items[i].concat(':name')
-        var multiselectData = t.column(columnName).data().sort().unique()
-        load_filter(filter_items[i], multiselectData)
+        var multiselectData = table.column(columnName).data().sort().unique()
+        //create the filter name from the filter_id
+        filter_name = "#".concat(filter_id.split("-")[0], '-filter #', filter_items[i])
+        button_name = filter_items[i]
+        //load the filter
+        load_filter(filter_name, multiselectData, button_name)
     }  
-}
-
-//reset filter data
-function reset_filter () {
-    show_players()
+    apply_filter(filter_id)
 };
 
 //apply the filter choices to the table
-function apply_filter () {
+function apply_filter (filter_id ){
     var applied_filters = []
     for (var i = 0; i < filter_items.length; i++) {
         var select_name = filter_items[i]
-        var selectedOptionValue = $("#" + select_name + " option:selected")
-        
+        var selectedOptionValue = $("#"+filter_id+" #" + select_name + " option:selected")
         //make sure at least one option is selected
         if (selectedOptionValue.length == 0) {
             alert("You need to select at least one item for: " + select_name)
@@ -193,15 +335,42 @@ function apply_filter () {
         return
     }
     //filter the rows
-    console.log(applied_filters)
+    //get the interm table
+    switch(filter_id) {
+    case 'players-filter':
+        interm_table = player_table;
+        break;
+    case 'goalies-filter':
+        interm_table = goalie_table;
+        break;
+    default:
+        alert('apply_filter() switch error')
+    }
 
-    // DataTable
-    var table = $('table').DataTable();
-    console.log(table)
- 
-    // Apply the search
+    //build the search string
+    for (var i = 0; i < applied_filters.length; i++){
+        var search_column_name = applied_filters[i].item_name.concat(':name')
+        var search_column_string = '(^'.concat(applied_filters[i].selected_options[0])
+        for(var x = 1; x < applied_filters[i].selected_options.length; x++) {
+            search_column_string = search_column_string.concat('$|^')
+            search_column_string = search_column_string.concat(applied_filters[i].selected_options[x])
+        }
+        search_column_string = search_column_string.concat('$)')
+        //apply the search string to the table
+        interm_table = interm_table.column(search_column_name).search(search_column_string, true, false)
+    }
+    //draw the table with the new searches applied
+    interm_table.draw()
     
 };
+
+function tab_switch(targeted_tab) {
+    var table_id = targeted_tab.concat('-table')
+    if( !$.fn.DataTable.isDataTable(table_id) ) {
+        console.log('need to load: ' + table_id)
+        load_table(table_id)
+    }
+}
 
 var loading;
 loading = loading || (function () {

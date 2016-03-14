@@ -11,8 +11,8 @@
 <div class="col-xs-12" style="height:10px;"></div>
 <div class="row">
     <div class="col-sm-12">
-        <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter();" />
-        <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter();" />
+        <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter('{{ panel_id }}');" />
+        <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter('{{ panel_id }}');" />
     </div>
 </div>
 {% endmacro -%}

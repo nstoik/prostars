@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, render_template, jsonify, session
+from flask import Flask, render_template, jsonify, session, request
 from data import fetch_all
 
 app = Flask(__name__)
@@ -20,8 +20,16 @@ def stats():
 @app.route('/stats/load_default/', methods=['GET', 'POST'])
 def load_default():
 
-	all_players = fetch_all('Hockey_Stats', 'Players')
-	return jsonify(row_data = all_players)
+	if request.method == 'POST':
+		table_id = request.form.get('table_id')
+		if (table_id == '#players-table'):
+			all_players = fetch_all('Hockey_Stats', 'Players')
+		elif (table_id == '#goalies-table'):
+			all_players = fetch_all('Hockey_Stats', 'Goalies')
+		
+		return jsonify(row_data = all_players, table_id = table_id)
+
+	return
 
 
 if __name__ == "__main__":

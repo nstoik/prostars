@@ -51,6 +51,9 @@
                     <li class="hidden">
                         <a class="page-scroll" href="#page-top"></a>
                     </li>
+                    <li>
+                        <a href={{ url_for('stats') }}>Hockey Stats</a>
+                    </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -103,10 +106,10 @@
     <!-- Load datatable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            load_table();
+            load_table('#players-table');
+            //execute tab_switch function whenever a tab is switched
             $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
-                var target = $(e.target).attr("href") // activated tab
-                alert(target);
+                tab_switch($(e.target).attr("href"))         
             });             
         });
     </script>

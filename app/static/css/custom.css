@@ -1,36 +1,71 @@
-.top-buffer { margin-top:100px; }
+.top-buffer { margin-top:95px; }
 
 .row-spacing { margin-top:10px; }
 
 th, tr{
     white-space: nowrap;
 }
-/*Freezing first column of table */
-.table-responsive {
-	overflow-x:auto;
+
+/*pill customization */
+@media (max-width: 768px) {
+  .nav-justified > li {
+    display: table-cell;
+    width: 1%;
+  }
+}
+
+/* pil color */
+.nav-pills>li>a {
+  font-size: large;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d9d9;
+  background-color: #ffffff;
+  color:#000000;
+}
+/* active pill color */
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+  color: #fff;
+  background-color: #666;
+
+}
+/* hover pill color */
+.nav-pills>li>a:hover {
+  color: #fff;
+  background-color: #666;
+}
+/*end pill customization */
+
+/*css to style table at certain size */
+@media (max-width: 991px) {
+    /* CSS goes here */
+    table > thead {
+    	font-size: 80%;
+	}
 }
 
 
-/*Spacing for table rows */
-.name-width {
-    max-width: 140px;
-    min-width: 140px;
-    width: 140px;
+/*make button full width */
+ .btn-group, .btn-group .multiselect {
+    width: 100% !important;
 }
-.type-width {
-    max-width: 95px;
-    min-width: 95px;
-    width: 95px;
+
+
+/*remove space around buttons for entire row */
+.row.no-pad {
+  margin-right:1px;
+  margin-left:1px;
+  margin-bottom:1px;
+  margin-top: 1px;
 }
-.div-width {
-    max-width: 88px;
-    min-width: 88px;
-    width: 88px;
+.row.no-pad > [class*='col-'] {
+  padding-right:1px;
+  padding-left:1px;
+  margin-bottom: 1px;
+  margin-top: 1px;
 }
-.night-width {
-    max-width: 76px;
-    min-width: 76px;
-    width: 76px;
-}
+
+
+
 
 

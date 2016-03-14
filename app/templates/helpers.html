@@ -1,38 +1,24 @@
-{% macro create_filter_panel(panel_id) -%}
-    <div id="{{ panel_id }}" class="panel panel-default">
-        <a data-toggle="collapse" href="#collapse1">
-            <div class="panel-heading">
-                <h3>Filter</h3>
-            </div>
-        </a>
-        <div id="collapse1" class="panel-collapse collapse">
-            <div class="panel-body">
-                <div class="row">
-                    {{ create_filter("Name") }}
-                    {{ create_filter("Type") }}
-                    {{ create_filter("Division") }}
-                    {{ create_filter("Year") }}
-                    {{ create_filter("Season") }}
-                    {{ create_filter("Night") }}
-                    {{ create_filter("Gender") }}
-                </div>
-            </div>
-            <div class="panel-footer">
-                <div class="row">
-                    <div class="col-sm-12 text-right">
-                        <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter();" />
-                        <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter();" />
-                        <input class="btn btn-primary" id="ReloadData" type="button" value="Reload Data" onclick="reload_data();" />
-                    </div>
-                </div>
-            </div>
-        </div>
+{% macro create_filter_section(panel_id) -%}
+<div id="{{ panel_id }}" class="row no-pad">
+    {{ create_filter("Name") }}
+    {{ create_filter("Type") }}
+    {{ create_filter("Division") }}
+    {{ create_filter("Year") }}
+    {{ create_filter("Season") }}
+    {{ create_filter("Night") }}
+    {{ create_filter("Gender") }}
+</div>
+<div class="col-xs-12" style="height:10px;"></div>
+<div class="row">
+    <div class="col-sm-12">
+        <input class="btn btn-primary" id="ApplyFilter" type="button" value="Apply Filter" onclick="apply_filter('{{ panel_id }}');" />
+        <input class="btn btn-primary" id="ResetFilter" type="button" value="Reset Filter" onclick="reset_filter('{{ panel_id }}');" />
     </div>
+</div>
 {% endmacro -%}
 
 {% macro create_filter(name) -%}
-    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
-	    <h4>{{ name }}</h4>
+    <div class="col-lg-2 col-sm-3 col-xs-6">
 	    <select id="{{ name }}" multiple="multiple">
 	    </select>
 	</div>

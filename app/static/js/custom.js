@@ -1,67 +1,267 @@
-function highlight_row(ctrl) {
-    var elements=document.getElementsByTagName('tr');
-    for(var i=0;i<elements.length;i++)
-        elements[i].classList.remove('backChange'); //remove one particular class from list of classNames in that element
-    ctrl.classList.add("backChange");//Add that particular class to classList of element's parent tr
-}
+//Global Variables
+var filter_items = ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"]
 
-function create_table_row_player (item) {
-    var row = $('<tr>' + 
-        '<td>' + item.Name + '</td>' + 
-        '<td>' + item.Type + '</td>' + 
-        '<td>' + item.Division + '</td>' + 
-        '<td>' + item.Year + '</td>' + 
-        '<td>' + item.Season + '</td>' + 
-        '<td>' + item.Night + '</td>' + 
-        '<td>' + item.Gender + '</td>' + 
-        '<td>' + item.GP + '</td>' + 
-        '<td>' + item.G + '</td>' +
-        '<td>' + item.A + '</td>' +
-        '<td>' + item.P + '</td>' +
-        '<td>' + item.Plus_Minus + '</td>' +
-        '<td>' + item.PIM + '</td> ' +
-        '<td>' + item.PPG + '</td>' +
-        '<td>' + item.SO_G + '</td>' +
-        '<td>' + item.SO_A + '</td>' +
-        '<td>' + item.SO_Pct + '</td>' +
-        '</tr>');
-    return row;
-}
+var player_table = null
+var player_config = [
+            {   "searchable": false,
+                "orderable": false,
+                "defaultContent": ""
+            },
+            {   name: "Name",
+                data: "Name" },
+            {   name: "Type",
+                data: "Type" },
+            {   name: "Division",
+                data: "Division" },
+            {   name: "Year",
+                data: "Year" },
+            {   name: "Season",
+                data: "Season" },
+            {   name: "Night",
+                data: "Night" },
+            {   name: "Gender",
+                data: "Gender" },
+            { data: "GP" },
+            { data: "G" },
+            { data: "A" },
+            { data: "P" },
+            { data: "Plus_Minus" },
+            { data: "PIM" },
+            { data: "PPG" },
+            { data: "SO_G" },
+            { data: "SO_A" },
+            { data: "SO_Pct" }
+        ]
 
-function load_filters (filters) {
-    $.each(filters, function(index, outer_item){
-        var select_name = outer_item.shift(),
-        select_id = $('#' + select_name)
-        if (outer_item.length > 10) {
-            $(select_id).multiselect({
-                maxHeight: 250,
-                includeSelectAllOption: true,
-                nonSelectedText: 'None Selected',
-                numberDisplayed: 1,
-                enableFiltering: true,
-                enableCaseInsensitiveFiltering: true
-            });
-        }
-        else {
-            $(select_id).multiselect({
-                maxHeight: 250,
-                includeSelectAllOption: true,
-                nonSelectedText: 'None Selected',
-                numberDisplayed: 2,
-            });
-        }
-        var options =[]
-        $.each(outer_item, function(index, item){
-            options.push(item)
-        });
-         $(select_id).multiselect('dataprovider', options);
+var goalie_table = null
+var goalie_config = [
+            {   "searchable": false,
+                "orderable": false,
+                "defaultContent": ""
+            },
+            {   name: "Name",
+                data: "Name" },
+            {   name: "Type",
+                data: "Type" },
+            {   name: "Division",
+                data: "Division" },
+            {   name: "Year",
+                data: "Year" },
+            {   name: "Season",
+                data: "Season" },
+            {   name: "Night",
+                data: "Night" },
+            {   name: "Gender",
+                data: "Gender" },
+            { data: "GP" },
+            { data: "W" },
+            { data: "L" },
+            { data: "T" },
+            { data: "GA" },
+            { data: "GAA" },
+            { data: "SO" },
+            { data: "SO_GA" },
+            { data: "SO_Sv" },
+            { data: "SO_SvPct" },
+            {   data: "G",
+                "visible": false,
+                "searchable": false },
+            {   data: "A",
+                "visible": false,
+                "searchable": false },
+            {   data: "P",
+                "visible": false,
+                "searchable": false },
+            {   data: "PIM",
+                "visible": false,
+                "searchable": false },
+            {   data: "PPG",
+                "visible": false,
+                "searchable": false },
+        ]
+
+/*load the table with 'table_id'.
+*This includes Datatables and Multiselect
+*for each table
+*/
+function load_table(table_id) {
+    dataSet = get_data(table_id)
+    //if data was not available exit early while ajax fetches data
+    if (dataSet === false) {
+        return
+    }
+    //get correct config values
+    switch(table_id) {
+    case '#players-table':
+        table_config = player_config;
+        break;
+    case '#goalies-table':
+        table_config = goalie_config;
+        break;
+    default:
+        alert('load_table() config switch error')
+    }
+    //have data. now setup
+    var t = $(table_id).DataTable({
+        scrollX: true,
+        lengthChange: false,
+        pageLength: 15,
+        pagingType: "numbers",
+        retrieve: true,
+        dom: '<<t>ip>',
+        fixedColumns:   {
+            leftColumns: 2
+        },
+        "search": {
+            "caseInsensitive": false
+        },
+        data: dataSet,
+        columns: table_config,
+    "order": [[ 1, 'asc' ]]
     });
+
+    //for rank column
+    t.on( 'order.dt search.dt', function () {
+        t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+            cell.innerHTML = i+1;
+        });
+    }).draw();
+    //store the table in the correct global variable
+    switch(table_id) {
+    case '#players-table':
+        player_table = t;
+        break;
+    case '#goalies-table':
+        goalie_table = t;
+        break;
+    default:
+        alert('load_table() store switch error')
+    }
+    
+    //now configure the multiselect filtering section
+    for (var i = 0; i < filter_items.length; i++) {
+        var columnName = filter_items[i].concat(':name')
+        var multiselectData = t.column(columnName).data().sort().unique()
+        //create the filter name from the table_id and filter_id
+        filter_name = table_id.split("-")[0].concat('-filter #').concat(filter_items[i])
+        button_name = filter_items[i]
+        //load the filter
+        load_filter(filter_name, multiselectData, button_name)
+    }  
 }
 
-function load_default () {
+/*load the filter for multiselect
+*/
+function load_filter (filter_name, filter_data, button_name) {
+    //configure multiselect options
+    $(filter_name).multiselect({
+        maxHeight: 250,
+        includeSelectAllOption: true,
+        nSelectedText: button_name,
+        numberDisplayed: 1,
+        //this function is for the text on the buttons
+        buttonText: function(options, select) {
+            var numberOfOptions = $('#'+this.nSelectedText+' option').length;
+            
+            if (options.length === 0) {
+                return this.nSelectedText;
+            }
+            else if (options.length > this.numberDisplayed) {
+                return this.nSelectedText + ' (' + options.length + ')';
+            }
+            else if (options.length === numberOfOptions) {
+                return this.nSelectedText + ' (' + options.length + ')';
+            }
+
+            else {
+                var labels = [];
+                options.each(function() {
+                    if ($(this).attr('label') !== undefined) {
+                        labels.push($(this).attr('label'));
+                    }
+                    else {
+                        labels.push($(this).html());
+                    }  
+                });
+                return labels.join(', ') + '';
+            }
+        }
+    });
+    //add all options to the multiselect
+    var options = [];
+    for (var i=0; i < filter_data.length; i++) {
+        select_data = {}
+        select_data['label'] = filter_data[i]
+        select_data['title'] = filter_data[i]
+        select_data['value'] = filter_data[i]
+        select_data['selected'] = 'true'
+        options.push(select_data)
+    }
+    $(filter_name).multiselect('dataprovider', options);
+}
+
+/*get the data for a given table
+*Data is in sessionStorage
+*If data is expired, or not present, load_default
+*is called to fetch from server
+*/
+function get_data (table_id) {
+    //set appropriate variables based on table_id
+    switch(table_id) {
+    case '#players-table':
+        session_data = 'player_data'
+        session_timestamp = 'player_timestamp'
+        break;
+    case '#goalies-table':
+        session_data = 'goalie_data'
+        session_timestamp = 'goalie_timestamp'
+        break;
+    default:
+        alert('get_data() switch error')
+    }
+    //check if data and timestamp is in sessionStorage
+    if (!(session_data in sessionStorage && session_timestamp in sessionStorage)) {
+        //something is missing so fetch all data
+        load_default(table_id)
+        //return early to allow async of data fetch
+        return false
+    }
+    //else check timestamp to see if data is still valid
+    //add 15 minutes to timestamp
+    var timestamp = new Date(JSON.parse(sessionStorage.getItem(session_timestamp)) + 15*60000);
+    now = new Date();
+
+    if (now > timestamp){
+        //data is outdated so fetch again
+        load_default(table_id)
+        return false
+    }
+    //all checks are good
+    //we already have the data. Just return data
+    return JSON.parse(sessionStorage.getItem(session_data))
+}
+/*load data for table_id from server
+*load_table is called for the table_id after finishing
+*/
+function load_default (table_id) {
+    switch(table_id) {
+    case '#players-table':
+        session_data = 'player_data'
+        session_timestamp = 'player_timestamp'
+        break;
+    case '#goalies-table':
+        session_data = 'goalie_data'
+        session_timestamp = 'goalie_timestamp'
+        break;
+    default:
+        alert('load_default() switch error')
+    }
     $.ajax({
         url: '/stats/load_default/',
-        type: 'GET',
+        data: { 
+        'table_id': table_id
+        },
+        type: 'POST',
         beforeSend: function(){
             loading.showLoading();
         },
@@ -69,27 +269,12 @@ function load_default () {
             loading.hideLoading();
         },
         success : function(data) {
-            //store data in sessionStorage
-            sessionStorage.setItem('player_data', JSON.stringify(data.row_data))          
-            sessionStorage.setItem('player_filter_criteria', JSON.stringify(data.filter_criteria))            
-            //add data to table rows
-            $.each(data.row_data, function(index, item){
-                var row = create_table_row_player(item);
-                $('table tbody').append(row);
-            });    
-            $('table').trigger('footable_redraw');
-            //gather filter meta data
-            var filter_metadata = []
-            $.each(data.filter_criteria, function(index, item){
-                var temp = {
-                    'item_name': item[0],
-                    'total_options': item.length - 1
-                };
-                filter_metadata.push(temp);
-            });
-            sessionStorage.setItem('player_filter_metadata',JSON.stringify(filter_metadata))
-            //add filter criteria
-            load_filters(data.filter_criteria)
+            //store data in sessionStorage and set a timestamp
+            sessionStorage.setItem(session_timestamp, JSON.stringify(new Date().getTime()))
+            sessionStorage.setItem(session_data, JSON.stringify(data.row_data))           
+            //load table. This always needs to be done in the success callback. Get table_id from server data
+            server_tableID = JSON.stringify(data.table_id).replace(/['"]+/g, '')         
+            load_table(server_tableID);
         },
         error : function(xhr, statusText, error) { 
             alert("Error! Could not retrieve the data " + error);
@@ -97,102 +282,95 @@ function load_default () {
     });
 }
 
-function show_players () {
-    if ('player_data' in sessionStorage && 'player_filter_criteria' in sessionStorage) {
-        $.each(JSON.parse(sessionStorage.getItem('player_data')), function(index, item){
-            var row = create_table_row_player(item);
-            $('table tbody').append(row);
-        });    
-        $('table').trigger('footable_redraw');
-        load_filters(JSON.parse(sessionStorage.getItem('player_filter_criteria')))
-    }
-    else {
-        load_default()
-    }
-}
-//reload data from the server
-function reload_data () {
-    $('#collapse1').collapse('hide')
-    $("html, body").animate({ scrollTop: 0 }, "slow");
-    $("#player-table > tbody").html("");
-    load_default()
-    //force a redraw   
-    $('table').trigger('footable_redraw');
-            
-};
 
 //reset filter data
-function reset_filter () {
-    show_players()
+function reset_filter (filter_id) {
+    //get the  table
+    switch(filter_id) {
+    case 'players-filter':
+        table = player_table;
+        break;
+    case 'goalies-filter':
+        table = goalie_table;
+        break;
+    default:
+        alert('apply_filter() switch error')
+    }
+    //now configure the multiselect filtering section
+    for (var i = 0; i < filter_items.length; i++) {
+        var columnName = filter_items[i].concat(':name')
+        var multiselectData = table.column(columnName).data().sort().unique()
+        //create the filter name from the filter_id
+        filter_name = "#".concat(filter_id.split("-")[0], '-filter #', filter_items[i])
+        button_name = filter_items[i]
+        //load the filter
+        load_filter(filter_name, multiselectData, button_name)
+    }  
+    apply_filter(filter_id)
 };
 
 //apply the filter choices to the table
-function apply_filter () {
-
-    
+function apply_filter (filter_id ){
     var applied_filters = []
-    //get the applied filters
-    filter_metadata = JSON.parse(sessionStorage.getItem('player_filter_metadata'))
-    $.each(filter_metadata, function(index, item){
-        var select_name = item.item_name
-        var selectedOptionValue = $("#" + select_name + " option:selected")
-        
+    for (var i = 0; i < filter_items.length; i++) {
+        var select_name = filter_items[i]
+        var selectedOptionValue = $("#"+filter_id+" #" + select_name + " option:selected")
         //make sure at least one option is selected
         if (selectedOptionValue.length == 0) {
             alert("You need to select at least one item for: " + select_name)
             return false
-        }
-        //skip selection if all items are selected
-        if (selectedOptionValue.length == item.total_options) {
-            return
         }
         //gather the options selected
         var single_filter = {
             'item_name': select_name,
             'selected_options' : []
         }
-        for (var i = 0; i < selectedOptionValue.length; i++) {
-            single_filter.selected_options.push(selectedOptionValue[i].value)
+        for (var j = 0; j < selectedOptionValue.length; j++) {
+            single_filter.selected_options.push(selectedOptionValue[j].value)
         }
         applied_filters.push(single_filter)
-    });
+    }
     //if there are no filters to apply, exit
     if (applied_filters.length == 0) {
-        show_players()
         return
     }
     //filter the rows
-    row_data = JSON.parse(sessionStorage.getItem('player_data'))
-    rows_to_remove = []
-    //for each row of data
-    for (var r = 0; r < row_data.length; r++) {
-        //for each filter in applied filters
-        for (var f = 0; f < applied_filters.length; f++){
-            filter_name = applied_filters[f].item_name
-            filter_options = applied_filters[f].selected_options
-            //chech if the data from the row is in the filter
-            if (filter_options.indexOf(row_data[r][filter_name].toString()) == -1) {
-                rows_to_remove.push(r)
-                break
-            }
-            
-        }
-    }
-    //now remove all the rows that need to be
-    //need to traverse the array backwards
-    for (var i = rows_to_remove.length - 1; i >= 0; i--) {
-        row_data.splice(rows_to_remove[i],1)
+    //get the interm table
+    switch(filter_id) {
+    case 'players-filter':
+        interm_table = player_table;
+        break;
+    case 'goalies-filter':
+        interm_table = goalie_table;
+        break;
+    default:
+        alert('apply_filter() switch error')
     }
 
-    //show rows
-    $("#player-table > tbody").html("");
-    for (var i = 0; i < row_data.length; i++) {
-        var row = create_table_row_player(row_data[i]);
-        $('table tbody').append(row); 
-    }  
-    $('table').trigger('footable_redraw');
+    //build the search string
+    for (var i = 0; i < applied_filters.length; i++){
+        var search_column_name = applied_filters[i].item_name.concat(':name')
+        var search_column_string = '(^'.concat(applied_filters[i].selected_options[0])
+        for(var x = 1; x < applied_filters[i].selected_options.length; x++) {
+            search_column_string = search_column_string.concat('$|^')
+            search_column_string = search_column_string.concat(applied_filters[i].selected_options[x])
+        }
+        search_column_string = search_column_string.concat('$)')
+        //apply the search string to the table
+        interm_table = interm_table.column(search_column_name).search(search_column_string, true, false)
+    }
+    //draw the table with the new searches applied
+    interm_table.draw()
     
 };
+
+function tab_switch(targeted_tab) {
+    var table_id = targeted_tab.concat('-table')
+    if( !$.fn.DataTable.isDataTable(table_id) ) {
+        console.log('need to load: ' + table_id)
+        load_table(table_id)
+    }
+}
 
 var loading;
 loading = loading || (function () {

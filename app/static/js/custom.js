@@ -6,6 +6,7 @@ var player_config = [
             {   "searchable": false,
                 "orderable": false,
                 "defaultContent": ""
+
             },
             {   name: "Name",
                 data: "Name" },

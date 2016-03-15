@@ -94,9 +94,11 @@ function load_table(table_id) {
     switch(table_id) {
     case '#players-table':
         table_config = player_config;
+        sort_order = [[ 11, 'desc' ]]
         break;
     case '#goalies-table':
         table_config = goalie_config;
+        sort_order = [[ 9, 'desc' ]]
         break;
     default:
         alert('load_table() config switch error')
@@ -117,7 +119,7 @@ function load_table(table_id) {
         },
         data: dataSet,
         columns: table_config,
-    "order": [[ 1, 'asc' ]]
+        "order": sort_order
     });
 
     //for rank column
@@ -143,11 +145,12 @@ function load_table(table_id) {
         var columnName = filter_items[i].concat(':name')
         var multiselectData = t.column(columnName).data().sort().unique()
         //create the filter name from the table_id and filter_id
-        filter_name = table_id.split("-")[0].concat('-filter #').concat(filter_items[i])
+        filter_name = table_id.split("-")[0].concat('-filter #',filter_items[i])
         button_name = filter_items[i]
         //load the filter
         load_filter(filter_name, multiselectData, button_name)
     }  
+    apply_filter(table_id.substr(1).split("-")[0].concat('-filter'))
 }
 
 /*load the filter for multiselect
@@ -188,16 +191,55 @@ function load_filter (filter_name, filter_data, button_name) {
         }
     });
     //add all options to the multiselect
+    //sort days of week
+    if (button_name == "Night") {
+        days = ['Moday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        filter_data.sort(function (a,b) {return days.indexOf(a) > days.indexOf(b)})
+    }
     var options = [];
     for (var i=0; i < filter_data.length; i++) {
         select_data = {}
         select_data['label'] = filter_data[i]
         select_data['title'] = filter_data[i]
         select_data['value'] = filter_data[i]
-        select_data['selected'] = 'true'
+        select_data['selected'] = 'false'
         options.push(select_data)
     }
     $(filter_name).multiselect('dataprovider', options);
+    if (button_name == "Year"){
+        for (var i=0; i < filter_data.length - 1; i++) {
+            $(filter_name).multiselect('deselect', filter_data[i])
+        }
+    }
+}
+/*helper function to get current season*/
+function getSeason() {
+    month = new Date().getMonth()
+    season = '';
+    switch(month) {
+        case '12':
+        case '1':
+        case '2':
+            season = 'Winter';
+        break;
+        case '3':
+        case '4':
+        case '5':
+            season = 'Spring';
+        break;
+        case '6':
+        case '7':
+        case '8':
+            season = 'Summer';
+        break;
+        case '9':
+        case '10': 
+        case '11':
+            season = 'Fall';
+        break;
+    }
+    console.log(season);
+    return season
 }
 
 /*get the data for a given table

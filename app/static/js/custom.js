@@ -120,7 +120,11 @@ function load_table(table_id) {
         },
         data: dataSet,
         columns: table_config,
-        "order": sort_order
+        "order": sort_order,
+        "language": {
+            info: "_START_ to _END_ of _TOTAL_ entries",
+            infoFiltered: " - filtered from _MAX_"
+        }
     });
 
     //for rank column
@@ -207,40 +211,21 @@ function load_filter (filter_name, filter_data, button_name) {
         options.push(select_data)
     }
     $(filter_name).multiselect('dataprovider', options);
-    if (button_name == "Year"){
+    if (button_name === "Year"){
         for (var i=0; i < filter_data.length - 1; i++) {
             $(filter_name).multiselect('deselect', filter_data[i])
         }
     }
-}
-/*helper function to get current season*/
-function getSeason() {
-    month = new Date().getMonth()
-    season = '';
-    switch(month) {
-        case '12':
-        case '1':
-        case '2':
-            season = 'Winter';
-        break;
-        case '3':
-        case '4':
-        case '5':
-            season = 'Spring';
-        break;
-        case '6':
-        case '7':
-        case '8':
-            season = 'Summer';
-        break;
-        case '9':
-        case '10': 
-        case '11':
-            season = 'Fall';
-        break;
+    else if (button_name === "Season") {
+        data = JSON.parse(sessionStorage.getItem('player_data'))
+        last_season = data[data.length-1]['Season']
+        console.log(last_season)
+        for (var i=0; i < filter_data.length; i++) {
+            if(!(last_season === filter_data[i])) {
+                $(filter_name).multiselect('deselect', filter_data[i])
+            }
+        }
     }
-    console.log(season);
-    return season
 }
 
 /*get the data for a given table
@@ -315,9 +300,8 @@ function load_default (table_id) {
             //store data in sessionStorage and set a timestamp
             sessionStorage.setItem(session_timestamp, JSON.stringify(new Date().getTime()))
             sessionStorage.setItem(session_data, JSON.stringify(data.row_data))           
-            //load table. This always needs to be done in the success callback. Get table_id from server data
-            server_tableID = JSON.stringify(data.table_id).replace(/['"]+/g, '')         
-            load_table(server_tableID);
+            //load table. This always needs to be done in the success callback.      
+            load_table(data.table_id);
         },
         error : function(xhr, statusText, error) { 
             alert("Error! Could not retrieve the data " + error);

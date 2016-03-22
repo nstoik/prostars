@@ -58,6 +58,7 @@ var goalie_config = [
             { data: "W" },
             { data: "L" },
             { data: "T" },
+            { data: "SOL" },
             { data: "GA" },
             { data: "GAA" },
             { data: "SO" },
@@ -217,9 +218,19 @@ function load_filter (filter_name, filter_data, button_name) {
         }
     }
     else if (button_name === "Season") {
-        data = JSON.parse(sessionStorage.getItem('player_data'))
+        //set appropriate variables based on table_id
+        switch(filter_name) {
+        case '#players-filter #Season':
+            session_data = 'player_data'
+            break;
+        case '#goalies-filter #Season':
+            session_data = 'goalie_data'
+            break;
+        default:
+            alert('load_filter() switch error')
+        }
+        data = JSON.parse(sessionStorage.getItem(session_data))
         last_season = data[data.length-1]['Season']
-        console.log(last_season)
         for (var i=0; i < filter_data.length; i++) {
             if(!(last_season === filter_data[i])) {
                 $(filter_name).multiselect('deselect', filter_data[i])

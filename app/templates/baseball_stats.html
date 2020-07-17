@@ -6,21 +6,21 @@
 <div class="row top-buffer"></div>
 <ul class="nav nav-pills nav-justified">
 	<li class="active">
-		<a data-toggle="pill" href="#hockey-players">Players</a>
+		<a data-toggle="pill" href="#baseball-players">Players</a>
 	</li>
 	<li>
-		<a data-toggle="pill" href="#hockey-goalies">Goalies</a>
+		<a data-toggle="pill" href="#baseball-pitchers">Pitchers</a>
 	</li>
 </ul>
 <div class="container">
 		<div class="tab-content">
-  			<div id="hockey-players" class="tab-pane fade in active">
+  			<div id="baseball-players" class="tab-pane fade in active">
   			<h3>Player Stats</h3>
-		        {{ create_filter_section('hockey-players-filter') }}
+		        {{ create_filter_section('baseball-players-filter') }}
 		        <div class="row row-spacing">
 		        </div>
 		        <div>
-		            <table id="hockey-players-table" class="table table-bordered table-striped table-condensed">
+		            <table id="baseball-players-table" class="table table-bordered table-striped table-condensed">
 		                <thead>
 		                    <tr>
 		                        <th>#</th>
@@ -48,13 +48,13 @@
 		            </table>
 		        </div>
   			</div>
-  			<div id="hockey-goalies" class="tab-pane fade">
-  				<h3>Goalie Stats</h3>
-  				{{ create_filter_section('hockey-goalies-filter') }}
+  			<div id="baseball-pitchers" class="tab-pane fade">
+  				<h3>Pitcher Stats</h3>
+  				{{ create_filter_section('baseball-pitcher-filter') }}
 		        <div class="row row-spacing">
 		        </div>
 		        <div>
-		            <table id="hockey-goalies-table" class="table table-bordered table-striped table-condensed">
+		            <table id="baseball-pitcher-table" class="table table-bordered table-striped table-condensed">
 		                <thead>
 		                    <tr>
 		                        <th>#</th>

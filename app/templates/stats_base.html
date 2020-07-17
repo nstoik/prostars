@@ -52,7 +52,10 @@
                         <a class="page-scroll" href="#page-top"></a>
                     </li>
                     <li>
-                        <a href={{ url_for('stats') }}>Hockey Stats</a>
+                        <a href={{ url_for('hockey_stats') }}>Hockey Stats</a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('baseball_stats') }}>Baseball Stats</a>
                     </li>
                 </ul>
             </div>
@@ -106,7 +109,7 @@
     <!-- Load datatable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            load_table('#players-table');
+            load_table('#hockey-players-table');
             //execute tab_switch function whenever a tab is switched
             $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
                 tab_switch($(e.target).attr("href"))         

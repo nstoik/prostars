@@ -14,20 +14,41 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/stats/')
-def stats():
+@app.route('/stats/hockey/')
+def hockey_stats():
     return render_template('hockey_stats.html')
 
 
-@app.route('/stats/load_default/', methods=['GET', 'POST'])
-def load_default():
+@app.route('/stats/hockey/load_default/', methods=['GET', 'POST'])
+def load_default_hockey():
 
     if request.method == 'POST':
         table_id = request.form.get('table_id')
-        if (table_id == '#players-table'):
+        if (table_id == '#hockey-players-table'):
             all_players = fetch_all('Hockey_Stats', 'Players')
-        elif (table_id == '#goalies-table'):
+        elif (table_id == '#hockey-goalies-table'):
             all_players = fetch_all('Hockey_Stats', 'Goalies')
+
+        print(all_players)
+        print(table_id)
+
+        return jsonify(row_data=all_players, table_id=table_id)
+
+    	
+@app.route('/stats/baseball/')
+def baseball_stats():
+    return render_template('baseball_stats.html')
+
+
+@app.route('/stats/baseball/load_default/', methods=['GET', 'POST'])
+def load_default_baseball():
+
+    if request.method == 'POST':
+        table_id = request.form.get('table_id')
+        if (table_id == '#baseball-players-table'):
+            all_players = fetch_all('Baseball_Stats', 'Players')
+        elif (table_id == '#baseball-pitchers-table'):
+            all_players = fetch_all('Baseball_Stats', 'Pitchers')
 
         print(all_players)
         print(table_id)

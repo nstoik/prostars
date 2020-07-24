@@ -5,9 +5,9 @@
     {{ create_filter("Division") }}
     {{ create_filter("Year") }}
     {{ create_filter("Season") }}
-    {% if panel_id == 'hockey-players-filter' %}
+    {% if panel_id.startswith('hockey') %}
         {{ create_filter("Night") }}
-    {% elif panel_id == 'baseball-players-filter' %}
+    {% elif panel_id.startswith('baseball') %}
         {{ create_filter("League") }}
     {% endif %}
     {{ create_filter("Gender") }}

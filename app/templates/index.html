@@ -47,10 +47,10 @@
                         <a class="page-scroll" href="#about">About</a>
                     </li>
                     <li>
-                        <a href={{ url_for('hockey_stats') }}>Hockey Stats</a>
+                        <a href={{ url_for('sport_stats', sport='hockey') }}>Hockey Stats</a>
                     </li>
                     <li>
-                        <a href={{ url_for('baseball_stats') }}>Baseball Stats</a>
+                        <a href={{ url_for('sport_stats', sport='baseball') }}>Baseball Stats</a>
                     </li>
                 </ul>
             </div>
@@ -64,10 +64,10 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
-                    <a class="btn btn-lg btn-default page-scroll" href={{ url_for('hockey_stats') }}>Go to Hockey Stats</a>
+                    <a class="btn btn-lg btn-default page-scroll" href={{ url_for('sport_stats', sport='hockey') }}>Go to Hockey Stats</a>
                 </div>
                 <div class="col-sm-6">
-                    <a class="btn btn-lg btn-default page-scroll" href={{ url_for('baseball_stats') }}>Go to Baseball Stats</a>
+                    <a class="btn btn-lg btn-default page-scroll" href={{ url_for('sport_stats', sport='baseball') }}>Go to Baseball Stats</a>
                 </div>
             </div>
         </div>

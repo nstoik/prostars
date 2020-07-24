@@ -5,7 +5,11 @@
     {{ create_filter("Division") }}
     {{ create_filter("Year") }}
     {{ create_filter("Season") }}
-    {{ create_filter("Night") }}
+    {% if panel_id == 'hockey-players-filter' %}
+        {{ create_filter("Night") }}
+    {% elif panel_id == 'baseball-players-filter' %}
+        {{ create_filter("League") }}
+    {% endif %}
     {{ create_filter("Gender") }}
 </div>
 <div class="col-xs-12" style="height:10px;"></div>

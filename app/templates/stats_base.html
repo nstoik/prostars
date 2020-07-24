@@ -52,10 +52,10 @@
                         <a class="page-scroll" href="#page-top"></a>
                     </li>
                     <li>
-                        <a href={{ url_for('hockey_stats') }}>Hockey Stats</a>
+                        <a href={{ url_for('sport_stats', sport='hockey') }}>Hockey Stats</a>
                     </li>
                     <li>
-                        <a href={{ url_for('baseball_stats') }}>Baseball Stats</a>
+                        <a href={{ url_for('sport_stats', sport='baseball') }}>Baseball Stats</a>
                     </li>
                 </ul>
             </div>
@@ -104,12 +104,20 @@
     <!-- Bootstrap Multiselect JavaScript -->
     <script src={{ url_for("static", filename="js/bootstrap-multiselect.js") }}></script>
 
-    <script src={{ url_for("static", filename="js/custom.js") }}></script>
+    {% if sport == 'hockey' %}
+
+        <script src={{ url_for("static", filename="js/custom_hockey.js") }}></script>
+
+    {% elif sport == 'baseball' %}
+
+        <script src={{ url_for("static", filename="js/custom_baseball.js") }}></script>
+
+    {% endif %}
 
     <!-- Load datatable -->
     <script type="text/javascript">
         $(document).ready(function(){
-            load_table('#hockey-players-table');
+            load_table('#{{ sport }}-players-table');
             //execute tab_switch function whenever a tab is switched
             $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
                 tab_switch($(e.target).attr("href"))         

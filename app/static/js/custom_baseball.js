@@ -6,7 +6,6 @@ var player_config = [
             {   "searchable": false,
                 "orderable": false,
                 "defaultContent": ""
-
             },
             {   name: "Name",
                 data: "Name" },
@@ -59,32 +58,15 @@ var pitcher_config = [
                 data: "League" },
             {   name: "Gender",
                 data: "Gender" },
-            { data: "GP" },
+            { data: "GS" },
+            { data: "IP" },
             { data: "W" },
             { data: "L" },
             { data: "T" },
-            { data: "SOL" },
-            { data: "GA" },
-            { data: "GAA" },
-            { data: "SO" },
-            { data: "SO_GA" },
-            { data: "SO_Sv" },
-            { data: "SO_SvPct" },
-            {   data: "G",
-                "visible": false,
-                "searchable": false },
-            {   data: "A",
-                "visible": false,
-                "searchable": false },
-            {   data: "P",
-                "visible": false,
-                "searchable": false },
-            {   data: "PIM",
-                "visible": false,
-                "searchable": false },
-            {   data: "PPG",
-                "visible": false,
-                "searchable": false },
+            { data: "SV" },
+            { data: "RA" },
+            { data: "BB/7" },
+            { data: "K/7" },
         ]
 
 /*load the table with 'table_id'.
@@ -101,7 +83,7 @@ function load_table(table_id) {
     switch(table_id) {
     case '#baseball-players-table':
         table_config = player_config;
-        sort_order = [[ 17, 'desc' ]]
+        sort_order = [[ 19, 'desc' ]]
         break;
     case '#baseball-pitchers-table':
         table_config = pitcher_config;

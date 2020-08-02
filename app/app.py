@@ -33,7 +33,7 @@ def load_default_sport(sport:str):
             if (table_id == '#baseball-players-table'):
                 all_players = fetch_all('dev_baseball_stats', 'Master_Batting')
             elif (table_id == '#baseball-pitchers-table'):
-                all_players = fetch_all('dev_baseball_stats', 'Pitchers')
+                all_players = fetch_all('dev_baseball_stats', 'Master_Pitching')
 
         return jsonify(row_data=all_players, table_id=table_id)
 

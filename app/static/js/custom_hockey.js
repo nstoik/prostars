@@ -94,11 +94,11 @@ function load_table(table_id) {
     }
     //get correct config values
     switch(table_id) {
-    case '#players-table':
+    case '#hockey-players-table':
         table_config = player_config;
         sort_order = [[ 11, 'desc' ]]
         break;
-    case '#goalies-table':
+    case '#hockey-goalies-table':
         table_config = goalie_config;
         sort_order = [[ 9, 'desc' ]]
         break;
@@ -136,10 +136,10 @@ function load_table(table_id) {
     }).draw();
     //store the table in the correct global variable
     switch(table_id) {
-    case '#players-table':
+    case '#hockey-players-table':
         player_table = t;
         break;
-    case '#goalies-table':
+    case '#hockey-goalies-table':
         goalie_table = t;
         break;
     default:
@@ -151,12 +151,12 @@ function load_table(table_id) {
         var columnName = filter_items[i].concat(':name')
         var multiselectData = t.column(columnName).data().sort().unique()
         //create the filter name from the table_id and filter_id
-        filter_name = table_id.split("-")[0].concat('-filter #',filter_items[i])
+        filter_name = table_id.split("-table")[0].concat('-filter #',filter_items[i])
         button_name = filter_items[i]
         //load the filter
         load_filter(filter_name, multiselectData, button_name)
     }  
-    apply_filter(table_id.substr(1).split("-")[0].concat('-filter'))
+    apply_filter(table_id.substr(1).split("-table")[0].concat('-filter'))
 }
 
 /*load the filter for multiselect
@@ -220,11 +220,11 @@ function load_filter (filter_name, filter_data, button_name) {
     else if (button_name === "Season") {
         //set appropriate variables based on table_id
         switch(filter_name) {
-        case '#players-filter #Season':
-            session_data = 'player_data'
+        case '#hockey-players-filter #Season':
+            session_data = 'hockey_player_data'
             break;
-        case '#goalies-filter #Season':
-            session_data = 'goalie_data'
+        case '#hockey-goalies-filter #Season':
+            session_data = 'hockey_goalie_data'
             break;
         default:
             alert('load_filter() switch error')
@@ -247,13 +247,13 @@ function load_filter (filter_name, filter_data, button_name) {
 function get_data (table_id) {
     //set appropriate variables based on table_id
     switch(table_id) {
-    case '#players-table':
-        session_data = 'player_data'
-        session_timestamp = 'player_timestamp'
+    case '#hockey-players-table':
+        session_data = 'hockey_player_data'
+        session_timestamp = 'hockey_player_timestamp'
         break;
-    case '#goalies-table':
-        session_data = 'goalie_data'
-        session_timestamp = 'goalie_timestamp'
+    case '#hockey-goalies-table':
+        session_data = 'hockey_goalie_data'
+        session_timestamp = 'hockey_goalie_timestamp'
         break;
     default:
         alert('get_data() switch error')
@@ -284,19 +284,19 @@ function get_data (table_id) {
 */
 function load_default (table_id) {
     switch(table_id) {
-    case '#players-table':
-        session_data = 'player_data'
-        session_timestamp = 'player_timestamp'
+    case '#hockey-players-table':
+        session_data = 'hockey_player_data'
+        session_timestamp = 'hockey_player_timestamp'
         break;
-    case '#goalies-table':
-        session_data = 'goalie_data'
-        session_timestamp = 'goalie_timestamp'
+    case '#hockey-goalies-table':
+        session_data = 'hockey_goalie_data'
+        session_timestamp = 'hockey_goalie_timestamp'
         break;
     default:
         alert('load_default() switch error')
     }
     $.ajax({
-        url: '/stats/load_default/',
+        url: '/stats/hockey/load_default/',
         data: { 
         'table_id': table_id
         },
@@ -325,10 +325,10 @@ function load_default (table_id) {
 function reset_filter (filter_id) {
     //get the  table
     switch(filter_id) {
-    case 'players-filter':
+    case 'hockey-players-filter':
         table = player_table;
         break;
-    case 'goalies-filter':
+    case 'hockey-goalies-filter':
         table = goalie_table;
         break;
     default:
@@ -339,7 +339,7 @@ function reset_filter (filter_id) {
         var columnName = filter_items[i].concat(':name')
         var multiselectData = table.column(columnName).data().sort().unique()
         //create the filter name from the filter_id
-        filter_name = "#".concat(filter_id.split("-")[0], '-filter #', filter_items[i])
+        filter_name = "#".concat(filter_id, ' #', filter_items[i])
         button_name = filter_items[i]
         //load the filter
         load_filter(filter_name, multiselectData, button_name)
@@ -375,10 +375,10 @@ function apply_filter (filter_id ){
     //filter the rows
     //get the interm table
     switch(filter_id) {
-    case 'players-filter':
+    case 'hockey-players-filter':
         interm_table = player_table;
         break;
-    case 'goalies-filter':
+    case 'hockey-goalies-filter':
         interm_table = goalie_table;
         break;
     default:

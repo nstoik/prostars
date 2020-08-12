@@ -8,13 +8,13 @@ def connect():
 	
 	return gc
 
-def fetch_all(spreadsheet_name, worksheet_name):
+def fetch_all(spreadsheet_name, worksheet_name, numericise_ignore=None):
 
     gc = connect()
     spreadsheet = gc.open(spreadsheet_name)
     worksheet = spreadsheet.worksheet(worksheet_name)
 
-    all_data = worksheet.get_all_records(empty2zero=True)
+    all_data = worksheet.get_all_records(empty2zero=True, numericise_ignore=numericise_ignore)
 
     return all_data
 

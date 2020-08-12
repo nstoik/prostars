@@ -58,6 +58,7 @@ var pitcher_config = [
                 data: "League" },
             {   name: "Gender",
                 data: "Gender" },
+            { data: "G" },
             { data: "GS" },
             { data: "IP" },
             { data: "W" },

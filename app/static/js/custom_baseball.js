@@ -88,7 +88,7 @@ function load_table(table_id) {
         break;
     case '#baseball-pitchers-table':
         table_config = pitcher_config;
-        sort_order = [[ 9, 'desc' ]]
+        sort_order = [[ 10, 'desc' ]]
         break;
     default:
         alert('load_table() config switch error')

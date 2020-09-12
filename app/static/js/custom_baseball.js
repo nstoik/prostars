@@ -60,7 +60,25 @@ var pitcher_config = [
                 data: "Gender" },
             { data: "G" },
             { data: "GS" },
-            { data: "IP" },
+            {   name: "IP",
+                data: "IP",
+                type: "int",
+                render: function ( data, type, row ) {
+                    // special function to convert a number and fraction into a decimal for sorting purposes.
+                    // special sort function for IP 
+                    if ( type === 'sort') {
+                        split_string = data.split(" ")
+                        number = eval(split_string[0])
+                        if (split_string.length > 1 ) {
+                            number = number + eval(split_string[1])
+                        }
+                        return number
+                    }
+                    // Otherwise just return
+                    // that, unaltered
+                    return data;
+                }
+            },
             { data: "W" },
             { data: "L" },
             { data: "T" },

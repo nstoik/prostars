@@ -34,7 +34,7 @@ def load_default_sport(sport:str):
                 treat_columns_as_strings=[19,20,21,22]
                 all_players = fetch_all('baseball_stats', 'Master_Batting',numericise_ignore=treat_columns_as_strings)
             elif (table_id == '#baseball-pitchers-table'):
-                treat_columns_as_strings=[15,16,17]
+                treat_columns_as_strings=[10, 15,16,17]
                 all_players = fetch_all('baseball_stats', 'Master_Pitching',numericise_ignore=treat_columns_as_strings)
 
         return jsonify(row_data=all_players, table_id=table_id)

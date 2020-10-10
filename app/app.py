@@ -1,8 +1,8 @@
 import os
 import sys
-from flask import Flask, render_template, jsonify, session, request
+from flask import Flask, render_template, jsonify, session, request, send_file
 
-from data import fetch_all
+from app.data import fetch_all
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -38,6 +38,13 @@ def load_default_sport(sport:str):
                 all_players = fetch_all('baseball_stats', 'Master_Pitching',numericise_ignore=treat_columns_as_strings)
 
         return jsonify(row_data=all_players, table_id=table_id)
+
+
+@app.route('/pants2020.pdf')
+def show_static_pdf():
+
+    filepath = os.path.abspath('app/static/pdfs/pants2020.pdf')
+    return send_file(filename_or_fp=filepath, attachment_filename='pants2020.pdf', mimetype='application/pdf')
 
 
 if __name__ == "__main__":

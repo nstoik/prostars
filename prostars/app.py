@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, render_template, jsonify, session, request, send_file
 
-from app.data import fetch_all
+from prostars.data import fetch_all
 
 sys.path.append(os.path.dirname(__file__))
 

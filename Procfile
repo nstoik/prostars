@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath app prostars:app
+web: gunicorn prostars.app:app

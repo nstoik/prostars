@@ -4,7 +4,7 @@ import gspread
 
 def connect():
 
-	gc = gspread.service_account(filename='app/Prostars-c02b661b2a77.json')
+	gc = gspread.service_account(filename='prostars/Prostars-c02b661b2a77.json')
 	
 	return gc
 

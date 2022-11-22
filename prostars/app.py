@@ -39,14 +39,6 @@ def load_default_sport(sport:str):
 
         return jsonify(row_data=all_players, table_id=table_id)
 
-
-@app.route('/pants2020.pdf')
-def show_static_pdf():
-
-    filepath = os.path.abspath('prostars/static/pdfs/pants2020.pdf')
-    return send_file(filename_or_fp=filepath, attachment_filename='pants2020.pdf', mimetype='application/pdf')
-
-
 if __name__ == "__main__":
 
     port = os.environ.get('PORT', 5000)

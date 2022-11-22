@@ -4,9 +4,14 @@ import gspread
 
 def connect():
 
-	gc = gspread.service_account(filename='prostars/Prostars-c02b661b2a77.json')
-	
-	return gc
+    # find the json config file in the same directory as this file
+    filename = "Prostars-c02b661b2a77.json"
+    json_file = os.path.join(os.path.dirname(__file__), filename)
+
+    gc = gspread.service_account(filename=json_file)
+
+    return gc
+
 
 def fetch_all(spreadsheet_name, worksheet_name, numericise_ignore=None):
 

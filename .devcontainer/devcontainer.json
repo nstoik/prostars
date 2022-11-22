@@ -1,0 +1,44 @@
+{
+	"name": "Prostars",
+	"dockerFile": "./devcontainer.Dockerfile",
+
+	"mounts": [
+		"source=prostars-bashhistory,target=/commandhistory,type=volume"
+	],
+
+	"workspaceFolder": "/workspaces/prostars",
+	"shutdownAction": "stopContainer",
+	"runArgs": [
+		"--name", "prostars-devcontainer"
+	],
+
+	"extensions": [
+		"ms-python.python",
+		"eamodio.gitlens",
+		"ms-python.vscode-pylance",
+		"github.copilot",
+	],
+	"postCreateCommand": "git config --global user.email 'nelsonstoik@gmail.com' && git config --global user.name 'Nelson'",
+	"settings": {
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.pylintArgs": ["--load-plugins",],
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Args": ["--config=/workspaces/device/setup.cfg"],
+		"python.linting.mypyEnabled": true,
+		"python.linting.mypyArgs": ["--config=/workspaces/device/setup.cfg"],
+		"python.formatting.provider": "black"
+	}
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

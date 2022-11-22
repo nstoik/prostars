@@ -1,4 +1,4 @@
-import json
+import os
 import gspread
 
 
@@ -14,7 +14,9 @@ def fetch_all(spreadsheet_name, worksheet_name, numericise_ignore=None):
     spreadsheet = gc.open(spreadsheet_name)
     worksheet = spreadsheet.worksheet(worksheet_name)
 
-    all_data = worksheet.get_all_records(empty2zero=True, numericise_ignore=numericise_ignore)
+    all_data = worksheet.get_all_records(
+        empty2zero=True, numericise_ignore=numericise_ignore
+    )
 
     return all_data
 
@@ -22,7 +24,16 @@ def fetch_all(spreadsheet_name, worksheet_name, numericise_ignore=None):
 def fetch_filter_criteria_hockey(worksheet, pre_selected="true"):
 
     # used for sorting days of week
-    days = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    days = [
+        "",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
 
     filter_criteria = []
     for x in range(1, 8):
@@ -40,10 +51,10 @@ def fetch_filter_criteria_hockey(worksheet, pre_selected="true"):
         filter_data = [column_name]
         for item in unique_column:
             select_data = {}
-            select_data['label'] = item
-            select_data['title'] = item
-            select_data['value'] = item
-            select_data['selected'] = pre_selected
+            select_data["label"] = item
+            select_data["title"] = item
+            select_data["value"] = item
+            select_data["selected"] = pre_selected
             filter_data.append(select_data)
 
         filter_criteria.append(filter_data)

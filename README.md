@@ -30,5 +30,5 @@ GCloud deployment is done using the `gcloud` command line tool. You can install 
 To deploy the container to GCloud run:
 
 ```bash
-gcloud run deploy --source . --allow-unauthenticated --region northamerica-northeast2
+gcloud run deploy prostars --source . --allow-unauthenticated --region northamerica-northeast2
 ```

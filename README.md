@@ -21,14 +21,19 @@ To push the container to Docker Hub run:
 ```bash
 docker push nstoik/prostars:latest
 ```
-```
 
-## Deploying to GCloud
+## GCloud
 
 GCloud deployment is done using the `gcloud` command line tool. You can install it by following the instructions [here](https://cloud.google.com/sdk/docs/install-sdk#deb).
 
+# Regions
+In order to use the custom domain features of GCloud Cloud Run, there is a select option of regions that can be used. See [this list](https://cloud.google.com/run/docs/mapping-custom-domains#limitations) for the available regions.
+
+I am using the 'us-west1' region.
+
+## Deploying
 To deploy the container to GCloud run:
 
 ```bash
-gcloud run deploy prostars --source . --allow-unauthenticated --region northamerica-northeast2
+gcloud run deploy prostars --source . --allow-unauthenticated --region us-west1
 ```

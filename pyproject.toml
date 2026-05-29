@@ -1,0 +1,20 @@
+[project]
+name = "prostars"
+version = "0.2.0"
+description = "Prostars sports stats website"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1",
+    "gspread>=6.0",
+    "gunicorn>=22.0",
+    "flask-caching>=2.3",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pylint>=3.0",
+    "black>=24.0",
+    "flake8>=7.0",
+    "mypy>=1.0",
+]

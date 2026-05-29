@@ -1,12 +1,28 @@
 import os
-import sys
-from flask import Flask, render_template, jsonify, request
+
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request
+from flask_caching import Cache
 
 from prostars.data import fetch_all
 
-sys.path.append(os.path.dirname(__file__))
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "change-me-in-production")
+
+cache = Cache(app, config={"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 900})
+
+_TABLE_MAP: dict[str, dict[str, tuple[str, str, list[int] | None]]] = {
+    "hockey": {
+        "#hockey-players-table": ("Hockey_Stats", "Players", None),
+        "#hockey-goalies-table": ("Hockey_Stats", "Goalies", None),
+    },
+    "baseball": {
+        "#baseball-players-table": ("baseball_stats", "Master_Batting", [19, 20, 21, 22]),
+        "#baseball-pitchers-table": ("baseball_stats", "Master_Pitching", [10, 15, 16, 17]),
+    },
+}
 
 
 @app.route("/")
@@ -19,36 +35,23 @@ def sport_stats(sport: str):
     return render_template(f"{sport}_stats.html", sport=sport)
 
 
-@app.route("/stats/<sport>/load_default/", methods=["GET", "POST"])
+@app.route("/stats/<sport>/load_default/", methods=["POST"])
 def load_default_sport(sport: str):
+    table_id = request.form.get("table_id", "")
+    config = _TABLE_MAP.get(sport, {}).get(table_id)
+    if config is None:
+        return jsonify(error="Unknown sport or table"), 400
 
-    if request.method == "POST":
-        table_id = request.form.get("table_id")
-        if sport == "hockey":
-            if table_id == "#hockey-players-table":
-                all_players = fetch_all("Hockey_Stats", "Players")
-            elif table_id == "#hockey-goalies-table":
-                all_players = fetch_all("Hockey_Stats", "Goalies")
-        elif sport == "baseball":
-            if table_id == "#baseball-players-table":
-                treat_columns_as_strings = [19, 20, 21, 22]
-                all_players = fetch_all(
-                    "baseball_stats",
-                    "Master_Batting",
-                    numericise_ignore=treat_columns_as_strings,
-                )
-            elif table_id == "#baseball-pitchers-table":
-                treat_columns_as_strings = [10, 15, 16, 17]
-                all_players = fetch_all(
-                    "baseball_stats",
-                    "Master_Pitching",
-                    numericise_ignore=treat_columns_as_strings,
-                )
+    spreadsheet, worksheet, numericise_ignore = config
+    cache_key = f"data__{sport}__{table_id.lstrip('#')}"
+    data = cache.get(cache_key)
+    if data is None:
+        data = fetch_all(spreadsheet, worksheet, numericise_ignore)
+        cache.set(cache_key, data)
 
-        return jsonify(row_data=all_players, table_id=table_id)
+    return jsonify(row_data=data, table_id=table_id)
+
 
 if __name__ == "__main__":
-
-    port = os.environ.get("PORT", 5000)
-    app.secret_key = "mysecretkey"
-    app.run(host="0.0.0.0", port=port, debug=True, reload=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

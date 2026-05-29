@@ -17,8 +17,9 @@
 		"eamodio.gitlens",
 		"ms-python.vscode-pylance",
 		"github.copilot",
+		"anthropic.claude-code"
 	],
-	"postCreateCommand": "git config --global user.email 'nelsonstoik@gmail.com' && git config --global user.name 'Nelson'",
+	"postCreateCommand": "git config --global user.email 'nelsonstoik@gmail.com' && git config --global user.name 'Nelson' && UV_LINK_MODE=copy uv sync",
 	"settings": {
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,

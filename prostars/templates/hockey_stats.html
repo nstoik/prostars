@@ -1,93 +1,192 @@
-{% from 'helpers.html' import create_filter_section with context %}
-
 {% extends "stats_base.html" %}
 {% block content %}
-    
-<div class="row top-buffer"></div>
-<ul class="nav nav-pills nav-justified">
-	<li class="active">
-		<a data-toggle="pill" href="#hockey-players">Players</a>
-	</li>
-	<li>
-		<a data-toggle="pill" href="#hockey-goalies">Goalies</a>
-	</li>
-</ul>
-<div class="container">
-		<div class="tab-content">
-  			<div id="hockey-players" class="tab-pane fade in active">
-  			<h3>Player Stats</h3>
-		        {{ create_filter_section('hockey-players-filter') }}
-		        <div class="row row-spacing">
-		        </div>
-		        <div>
-		            <table id="hockey-players-table" class="table table-bordered table-striped table-condensed">
-		                <thead>
-		                    <tr>
-		                        <th>#</th>
-		                        <th>Name</th>
-		                        <th>Type</th>
-		                        <th>Division</th>
-		                        <th>Year</th>
-		                        <th>Season</th>
-		                        <th>Night</th>
-		                        <th>Gender</th>
-		                        <th>GP</th>
-		                        <th>G</th>
-		                        <th>A</th>
-		                        <th>P</th>
-		                        <th>+/-</th>
-		                        <th>PIM</th>
-		                        <th>PPG</th>
-		                        <th>SO_G</th>
-		                        <th>SO_A</th>
-		                        <th>SO_Pct</th>
-		                    </tr>
-		                </thead>
-		                <tbody>
-		                </tbody>
-		            </table>
-		        </div>
-  			</div>
-  			<div id="hockey-goalies" class="tab-pane fade">
-  				<h3>Goalie Stats</h3>
-  				{{ create_filter_section('hockey-goalies-filter') }}
-		        <div class="row row-spacing">
-		        </div>
-		        <div>
-		            <table id="hockey-goalies-table" class="table table-bordered table-striped table-condensed">
-		                <thead>
-		                    <tr>
-		                        <th>#</th>
-		                        <th>Name</th>
-		                        <th>Type</th>
-		                        <th>Division</th>
-		                        <th>Year</th>
-		                        <th>Season</th>
-		                        <th>Night</th>
-		                        <th>Gender</th>
-		                        <th>GP</th>
-		                        <th>W</th>
-		                        <th>L</th>
-		                        <th>T</th>
-		                        <th>SOL</th>
-		                        <th>GA</th>
-		                        <th>GAA</th>
-		                        <th>SO</th>
-		                        <th>SO_GA</th>
-		                        <th>SO_Sv</th>
-		                        <th>SO_SvPct</th>
-		                        <th>G</th>
-		                        <th>A</th>
-		                        <th>P</th>
-		                        <th>PIM</th>
-		                        <th>PPG</th>
-		                    </tr>
-		                </thead>
-		                <tbody>
-		                </tbody>
-		            </table>
-		        </div>
-  			</div>
-		</div>
+
+<script>
+window.PROSTARS_CONFIG = {
+  sport: "hockey",
+  tabs: [
+    {
+      id: "hockey-players",
+      tableId: "hockey-players-table",
+      label: "Skaters",
+      filterItems: ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"],
+      headers: ["#","Name","Type","Division","Year","Season","Night","Gender","GP","G","A","P","+/-","PIM","PPG","SO_G","SO_A","SO_Pct"],
+      headerTitles: {
+        "GP":     "Games Played",
+        "G":      "Goals",
+        "A":      "Assists",
+        "P":      "Points (G + A)",
+        "+/-":    "Plus/Minus",
+        "PIM":    "Penalty Minutes",
+        "PPG":    "Power Play Goals",
+        "SO_G":   "Shootout Goals",
+        "SO_A":   "Shootout Attempts",
+        "SO_Pct": "Shootout Percentage"
+      },
+      fieldMap: { "+/-": "Plus_Minus" },
+      defaultSort: { field: "P", dir: "desc" },
+      heatmapColumns: [
+        { key: "P", higherIsBetter: true },
+        { key: "G", higherIsBetter: true },
+        { key: "A", higherIsBetter: true }
+      ],
+      leaderStats: [
+        { key: "P", label: "Points",  higherIsBetter: true },
+        { key: "G", label: "Goals",   higherIsBetter: true },
+        { key: "A", label: "Assists", higherIsBetter: true }
+      ]
+    },
+    {
+      id: "hockey-goalies",
+      tableId: "hockey-goalies-table",
+      label: "Goalies",
+      filterItems: ["Name", "Type", "Division", "Year", "Season", "Night", "Gender"],
+      headers: ["#","Name","Type","Division","Year","Season","Night","Gender","GP","W","L","T","SOL","GA","GAA","SO","SO_GA","SO_Sv","SO_SvPct"],
+      headerTitles: {
+        "GP":       "Games Played",
+        "W":        "Wins",
+        "L":        "Losses",
+        "T":        "Ties",
+        "SOL":      "Shootout Losses",
+        "GA":       "Goals Against",
+        "GAA":      "Goals Against Average",
+        "SO":       "Shutouts",
+        "SO_GA":    "Shootout Goals Against",
+        "SO_Sv":    "Shootout Saves",
+        "SO_SvPct": "Shootout Save Percentage"
+      },
+      defaultSort: { field: "W", dir: "desc" },
+      heatmapColumns: [
+        { key: "W",   higherIsBetter: true },
+        { key: "GAA", higherIsBetter: false },
+        { key: "SO",  higherIsBetter: true }
+      ],
+      leaderStats: [
+        { key: "W",   label: "Wins",     higherIsBetter: true },
+        { key: "GAA", label: "Best GAA", higherIsBetter: false },
+        { key: "SO",  label: "Shutouts", higherIsBetter: true }
+      ]
+    }
+  ]
+};
+</script>
+
+<div id="prostars-app" v-cloak>
+
+  <!-- Hero -->
+  <section class="sport-hero">
+    <div class="hero-inner">
+      <div class="hero-icon-wrap">🏒</div>
+      <div class="hero-text-wrap">
+        <h1 class="hero-title">Hockey Stats</h1>
+        <p class="hero-subtitle">Prostars League</p>
+        <div class="hero-accent-bar"></div>
+      </div>
     </div>
+  </section>
+
+  <!-- Tab nav -->
+  <div class="sport-tabs-wrapper">
+    <ul class="sport-tabs nav">
+      <li class="nav-item" v-for="tab in tabs" :key="tab.id">
+        <button class="nav-link" :class="{ active: activeTabId === tab.id }"
+                @click="switchTab(tab.id)">[[ tab.label ]]</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab panes -->
+  <div v-for="tab in tabs" :key="tab.id" v-show="activeTabId === tab.id">
+
+    <!-- Loading -->
+    <div class="loading-overlay" v-if="isLoading[tab.id]">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading…</span>
+      </div>
+      <p>Loading stats…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-alert" v-if="loadError[tab.id]">
+      Failed to load stats: [[ loadError[tab.id] ]]
+    </div>
+
+    <!-- Leaderboard -->
+    <template v-if="activeTabId === tab.id && leaderboards.length > 0">
+      <div class="leaderboard-section">
+        <div class="leaderboard-inner">
+          <p class="leaderboard-heading">Leaders</p>
+          <div class="leaderboard-grid">
+            <div class="leader-card" v-for="board in leaderboards" :key="board.key">
+              <div class="leader-card-header">[[ board.label ]]</div>
+              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row">
+                <span class="leader-rank" :class="'leader-rank-' + leader.rank">[[ leader.rank ]]</span>
+                <span class="leader-name">[[ leader.name ]]</span>
+                <span class="leader-value">[[ formatStatValue(leader.value, board.key) ]]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Filter panel -->
+    <template v-if="activeTabId === tab.id && tabData[tab.id]">
+      <div class="filter-section">
+        <div class="filter-inner">
+          <div class="filter-bar">
+            <button class="filter-toggle-btn" :class="{ active: filterOpen }" @click="filterOpen = !filterOpen">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="flex-shrink:0">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+              Filters
+              <span class="filter-count-badge" v-if="activeFilterCount > 0">[[ activeFilterCount ]]</span>
+              <span class="filter-toggle-icon" :class="{ open: filterOpen }">▾</span>
+            </button>
+            <button class="btn-reset-filter" @click="resetFilters">Reset</button>
+          </div>
+
+          <div class="filter-chips" v-if="activeChips.length > 0">
+            <span class="filter-chip" v-for="chip in activeChips" :key="chip.key">
+              [[ chip.label ]]
+              <button class="filter-chip-remove" @click="removeChip(tab.id, chip.key)" title="Clear this filter">×</button>
+            </span>
+          </div>
+
+          <div class="filter-panel" v-show="filterOpen">
+            <div class="filter-groups">
+              <div v-for="group in filterGroups" :key="group.key">
+                <div class="filter-group-label">
+                  [[ group.key ]]
+                  <div class="filter-group-actions">
+                    <button class="filter-group-action-btn" @click="selectAll(tab.id, group.key)">All</button>
+                    <button class="filter-group-action-btn" @click="clearGroup(tab.id, group.key)">None</button>
+                  </div>
+                </div>
+                <div class="filter-options">
+                  <label class="filter-option" v-for="opt in group.options" :key="opt">
+                    <input type="checkbox" :value="opt" v-model="filters[tab.id][group.key]">
+                    [[ opt ]]
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="filter-footer">
+              <button class="btn-apply-filter" @click="applyFilters">Apply Filters</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Tabulator table -->
+    <div class="table-section" v-if="!isLoading[tab.id]">
+      <div class="table-inner">
+        <div :id="tab.tableId"></div>
+      </div>
+    </div>
+
+  </div><!-- end v-for tabs -->
+
+</div><!-- #prostars-app -->
 {% endblock %}

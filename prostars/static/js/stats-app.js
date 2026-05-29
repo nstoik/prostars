@@ -205,6 +205,7 @@ function initTabulator(tabConfig, data) {
     paginationCounter: "rows",
     movableColumns: false,
     responsiveLayout: false,
+    selectableRows: 1,
   });
 
   tabulatorInstances[tableId] = table;

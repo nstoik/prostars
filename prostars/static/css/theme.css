@@ -218,7 +218,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .sport-hero .hero-inner {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
@@ -270,7 +270,7 @@ a:hover { color: var(--accent-hover); }
   display: flex;
   gap: 0;
   border-bottom: none;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -308,7 +308,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .leaderboard-inner {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -399,7 +399,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .filter-inner {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -631,7 +631,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .table-inner {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -691,22 +691,27 @@ a:hover { color: var(--accent-hover); }
 /* Rows */
 .tabulator .tabulator-tableholder {
   background: var(--bg-surface);
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--bg-overlay) transparent;
+  padding-bottom: 10px;
+  scrollbar-width: auto;
+  scrollbar-color: var(--accent) var(--bg-elevated);
 }
 
 .tabulator .tabulator-tableholder::-webkit-scrollbar {
-  height: 6px;
+  height: 10px;
 }
 
 .tabulator .tabulator-tableholder::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-elevated);
 }
 
 .tabulator .tabulator-tableholder::-webkit-scrollbar-thumb {
-  background: var(--bg-overlay);
-  border-radius: 3px;
+  background: var(--accent);
+  border-radius: 5px;
+  border: 2px solid var(--bg-elevated);
+}
+
+.tabulator .tabulator-tableholder::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
 }
 
 .tabulator-row {
@@ -723,7 +728,15 @@ a:hover { color: var(--accent-hover); }
 .tabulator-row:hover,
 .tabulator-row.tabulator-selectable:hover {
   background: var(--bg-elevated) !important;
-  cursor: default;
+  cursor: pointer;
+}
+
+.tabulator-row.tabulator-selected,
+.tabulator-row.tabulator-selected:hover,
+.tabulator-row.tabulator-selected .tabulator-cell.tabulator-frozen {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-surface)) !important;
+  border-top: 1px solid var(--accent) !important;
+  border-bottom: 1px solid var(--accent) !important;
 }
 
 /* Cells */
@@ -821,6 +834,14 @@ a:hover { color: var(--accent-hover); }
 [data-sport="hockey"] .tabulator-cell.cell-heat-9 { background: rgba(56, 139, 253, 0.55) !important; }
 
 /* ── Responsive adjustments ─────────────────────────── */
+@media (min-width: 1200px) {
+  .sport-hero .hero-inner,
+  .sport-tabs-wrapper,
+  .leaderboard-section,
+  .filter-section,
+  .table-section { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
 @media (max-width: 768px) {
   .sport-hero { padding: 2.5rem 0 2rem; }
   .hero-title  { font-size: 2rem; }

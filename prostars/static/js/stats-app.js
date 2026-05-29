@@ -122,6 +122,13 @@ async function fetchTableData(sport, tableId) {
 
 const tabulatorInstances = {};
 
+function formatIP(decimalIP) {
+  const thirds = Math.round(decimalIP * 3);
+  const innings = Math.floor(thirds / 3);
+  const rem = thirds % 3;
+  return rem === 0 ? String(innings) : `${innings} ${rem}/3`;
+}
+
 function ipToNum(v) {
   const parts = String(v).trim().split(/\s+/);
   let n = parseFloat(parts[0]) || 0;
@@ -184,7 +191,7 @@ function buildTabulatorColumns(tabConfig) {
   return columns;
 }
 
-function initTabulator(tabConfig, data) {
+function initTabulator(tabConfig, data, onRowSelected) {
   const tableId = tabConfig.tableId;
 
   if (tabulatorInstances[tableId]) {
@@ -193,7 +200,7 @@ function initTabulator(tabConfig, data) {
 
   const { field: sortField, dir: sortDir } = tabConfig.defaultSort;
 
-  const table = new Tabulator("#" + tableId, {
+  const config = {
     data: data,
     columns: buildTabulatorColumns(tabConfig),
     initialSort: [{ column: sortField, dir: sortDir }],
@@ -206,7 +213,15 @@ function initTabulator(tabConfig, data) {
     movableColumns: false,
     responsiveLayout: false,
     selectableRows: 1,
-  });
+  };
+
+  const table = new Tabulator("#" + tableId, config);
+
+  if (onRowSelected) {
+    table.on("rowClick", (e, row) => {
+      onRowSelected(row.getData(), row);
+    });
+  }
 
   tabulatorInstances[tableId] = table;
   return table;
@@ -225,12 +240,13 @@ const { sport, tabs } = window.PROSTARS_CONFIG;
 
 const prostarsApp = createApp({
   setup() {
-    const activeTabId  = ref(tabs[0].id);
-    const tabData      = ref({});
-    const isLoading    = ref({});
-    const loadError    = ref({});
-    const filterOpen   = ref(false);
-    const filters      = ref({});
+    const activeTabId    = ref(tabs[0].id);
+    const tabData        = ref({});
+    const isLoading      = ref({});
+    const loadError      = ref({});
+    const filterOpen     = ref(false);
+    const filters        = ref({});
+    const selectedPlayer = ref(null);
 
     tabs.forEach(tab => {
       filters.value[tab.id] = {};
@@ -277,6 +293,49 @@ const prostarsApp = createApp({
         ...stat,
         leaders: getTopN(filteredData.value, stat.key, 3, stat.higherIsBetter),
       }));
+    });
+
+    // All seasons for the selected player (uses full dataset, not filtered)
+    const playerSeasons = computed(() => {
+      if (!selectedPlayer.value) return [];
+      const tab = activeTab.value;
+      if (!tab) return [];
+      const all = tabData.value[tab.id] || [];
+      return all
+        .filter(r => r.Name === selectedPlayer.value)
+        .sort((a, b) => b.Year - a.Year || String(b.Season).localeCompare(String(a.Season)));
+    });
+
+    // Distinct Type/Division values across all of a player's seasons
+    const playerMeta = computed(() => {
+      const rows = playerSeasons.value;
+      if (!rows.length) return null;
+      const uniq = k => [...new Set(rows.map(r => r[k]).filter(Boolean))].join(', ');
+      return { types: uniq('Type'), divs: uniq('Division') };
+    });
+
+    // Career totals aggregated from all seasons
+    const playerCareer = computed(() => {
+      const rows = playerSeasons.value;
+      if (!rows.length) return null;
+      const tab = activeTab.value;
+      const sum = k => rows.reduce((acc, r) => acc + (Number(r[k]) || 0), 0);
+
+      if (tab && tab.id === 'baseball-pitchers') {
+        const G = sum('G'), GS = sum('GS'), W = sum('W'), L = sum('L'), SV = sum('SV'), RA = sum('RA');
+        const IP = formatIP(rows.reduce((acc, r) => acc + ipToNum(r.IP), 0));
+        return { type: 'pitcher', G, GS, IP, W, L, SV, RA, seasons: rows.length };
+      }
+
+      // Batters (default)
+      const G   = sum('G'),  AB  = sum('AB'), H  = sum('H'),  BB = sum('BB');
+      const R   = sum('R'),  HR  = sum('HR'), RBI = sum('RBI');
+      const s1  = sum('1B'), s2  = sum('2B'), s3 = sum('3B');
+      const AVG = AB > 0 ? H / AB : 0;
+      const OBP = (AB + BB) > 0 ? (H + BB) / (AB + BB) : 0;
+      const SLG = AB > 0 ? (s1 + 2*s2 + 3*s3 + 4*HR) / AB : 0;
+      const OPS = OBP + SLG;
+      return { type: 'batter', G, AB, H, HR, RBI, R, AVG, OBP, SLG, OPS, seasons: rows.length };
     });
 
     const activeFilterCount = computed(() => {
@@ -362,7 +421,17 @@ const prostarsApp = createApp({
         isLoading.value = { ...isLoading.value, [tabId]: false };
         await nextTick();
 
-        initTabulator(tab, filteredData.value);
+        const onSel = tab.playerPanel
+          ? (d, row) => {
+              if (selectedPlayer.value === d.Name) {
+                selectedPlayer.value = null;
+                row.deselect();
+              } else {
+                selectedPlayer.value = d.Name;
+              }
+            }
+          : null;
+        initTabulator(tab, filteredData.value, onSel);
       } catch (err) {
         loadError.value = { ...loadError.value, [tabId]: err.message };
         console.error("Failed to load", tabId, err);
@@ -374,6 +443,7 @@ const prostarsApp = createApp({
 
     function switchTab(tabId) {
       if (activeTabId.value === tabId) return;
+      selectedPlayer.value = null;
       activeTabId.value = tabId;
       filterOpen.value = false;
       loadTab(tabId);
@@ -384,6 +454,7 @@ const prostarsApp = createApp({
     function applyFilters() {
       const tab = activeTab.value;
       const filtered = filteredData.value;
+      selectedPlayer.value = null;
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
@@ -393,6 +464,7 @@ const prostarsApp = createApp({
       const tab = activeTab.value;
       const data = tabData.value[tab.id];
       if (data) initDefaultFilters(tab, data);
+      selectedPlayer.value = null;
       const filtered = filteredData.value;
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
@@ -417,6 +489,15 @@ const prostarsApp = createApp({
       const filtered = filteredData.value;
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
+    }
+
+    function closePanel() {
+      selectedPlayer.value = null;
+      const tab = activeTab.value;
+      if (tab) {
+        const table = tabulatorInstances[tab.tableId];
+        if (table) table.deselectRow();
+      }
     }
 
     // ── Lifecycle ─────────────────────────────────────────────
@@ -445,6 +526,11 @@ const prostarsApp = createApp({
       activeChips,
       removeChip,
       formatStatValue,
+      selectedPlayer,
+      playerSeasons,
+      playerMeta,
+      playerCareer,
+      closePanel,
     };
   },
 });

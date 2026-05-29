@@ -500,6 +500,33 @@ const prostarsApp = createApp({
       }
     }
 
+    // Swipe-right-to-dismiss for mobile
+    let _swipeStartX = 0;
+
+    function onPanelTouchStart(e) {
+      _swipeStartX = e.touches[0].clientX;
+      e.currentTarget.style.transition = "none";
+    }
+
+    function onPanelTouchMove(e) {
+      const delta = e.touches[0].clientX - _swipeStartX;
+      if (delta > 0) {
+        e.currentTarget.style.transform = `translateX(${delta}px)`;
+      }
+    }
+
+    function onPanelTouchEnd(e) {
+      const delta = e.changedTouches[0].clientX - _swipeStartX;
+      if (delta > 90) {
+        e.currentTarget.style.transition = "transform 0.2s ease";
+        e.currentTarget.style.transform = "translateX(100%)";
+        setTimeout(closePanel, 200);
+      } else {
+        e.currentTarget.style.transition = "transform 0.2s ease";
+        e.currentTarget.style.transform = "";
+      }
+    }
+
     // ── Lifecycle ─────────────────────────────────────────────
 
     onMounted(() => loadTab(tabs[0].id));
@@ -531,6 +558,9 @@ const prostarsApp = createApp({
       playerMeta,
       playerCareer,
       closePanel,
+      onPanelTouchStart,
+      onPanelTouchMove,
+      onPanelTouchEnd,
     };
   },
 });

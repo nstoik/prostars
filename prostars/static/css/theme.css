@@ -855,11 +855,12 @@ a:hover { color: var(--accent-hover); }
 
 .pp-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   padding: 1.1rem 1rem 0.6rem;
   border-bottom: 2px solid var(--accent);
-  gap: 0.5rem;
+  gap: 0.4rem 0.5rem;
 }
 
 .pp-name {
@@ -870,6 +871,10 @@ a:hover { color: var(--accent-hover); }
   text-transform: uppercase;
   color: var(--text-primary);
   line-height: 1.1;
+}
+
+.pp-back {
+  display: none;
 }
 
 .pp-close {
@@ -997,7 +1002,29 @@ a:hover { color: var(--accent-hover); }
   .leaderboard-grid { grid-template-columns: repeat(2, 1fr); }
   .filter-groups    { grid-template-columns: repeat(2, 1fr); }
   .sport-cards { flex-direction: column; align-items: center; }
-  .player-panel { display: none; }
+
+  .player-panel {
+    top: 0;
+    width: 100%;
+    height: 100dvh;
+    border-left: none;
+    box-shadow: none;
+  }
+
+  .pp-close  { display: none; }
+
+  .pp-back {
+    display: flex !important;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+  }
 }
 
 @media (max-width: 480px) {

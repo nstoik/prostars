@@ -195,8 +195,12 @@ window.PROSTARS_CONFIG = {
     </div>
 
     <!-- Player panel — fixed overlay, batters tab only -->
-    <aside class="player-panel" v-if="selectedPlayer && tab.playerPanel">
+    <aside class="player-panel" v-if="selectedPlayer && tab.playerPanel"
+      @touchstart="onPanelTouchStart"
+      @touchmove.passive="onPanelTouchMove"
+      @touchend="onPanelTouchEnd">
         <div class="pp-header">
+          <button class="pp-back" @click="closePanel">&#8592; Back</button>
           <div class="pp-name">[[ selectedPlayer ]]</div>
           <button class="pp-close" @click="closePanel" title="Close">×</button>
         </div>

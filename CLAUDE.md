@@ -108,6 +108,7 @@ When ready to point `www.theprostars.ca` at the new service:
 1. Cloud Run → new service → **Custom domains** → map `www.theprostars.ca`
 2. Update DNS records as instructed (Cloud Run provides the CNAME/A records)
 3. Delete or stop the old service once traffic is confirmed healthy
+4. Delete the old `prostars-1215` GCP project from the personal account (GCP Console → IAM & Admin → Settings → Shut down project)
 
 ### Service account
 

@@ -105,19 +105,30 @@ docker push nstoik/prostars:latest
 
 ## GCP Cloud Run Deployment
 
-Install the `gcloud` CLI: https://cloud.google.com/sdk/docs/install-sdk
+**GCP project:** `prostars-369222` · **Region:** `us-west1`
 
-Region in use: `us-west1` (required for custom domain mapping).
+Deployments are triggered automatically via GitHub integration — every push to `main` rebuilds and redeploys.
 
-Deploy:
+### First deploy (one-time setup via GCP Console)
 
-```bash
-gcloud run deploy prostars --source . --allow-unauthenticated --region us-west1
-```
-
-Set environment variables on the Cloud Run service (GCP Console → Cloud Run → prostars → Edit & Deploy → Variables):
+1. GCP Console → **Cloud Run** → **Create Service**
+2. Choose **"Continuously deploy from a repository"** → connect GitHub → select `nstoik/prostars`
+3. Branch: `main` · Build type: **Dockerfile** · Docker target: `prod-stage`
+4. Service name: `prostars-new` (keeps it separate from the existing live service)
+5. Region: `us-west1`
+6. Under **Variables & Secrets**, add:
 
 | Variable | Value |
 |---|---|
-| `GOOGLE_CREDENTIALS` | Full contents of the `prostars-prod` service account JSON key |
+| `GOOGLE_CREDENTIALS` | Full contents of the service account JSON (no surrounding quotes) |
 | `SECRET_KEY` | A long random string |
+
+7. Allow unauthenticated requests → **Deploy**
+
+The service gets a `*.run.app` URL automatically. To use a custom domain, go to Cloud Run → service → **Custom domains**.
+
+### Service account
+
+Email: `prostars-dev@prostars-369222.iam.gserviceaccount.com`
+
+To generate a new key: GCP Console → IAM → Service Accounts → prostars-dev → Keys → Add Key → JSON.

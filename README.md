@@ -139,6 +139,9 @@ Deployments are triggered automatically — every push to the connected branch r
 | `SECRET_KEY` | `SECRET_KEY` |
 
 6. Allow unauthenticated requests → **Deploy**
+7. **Set Artifact Registry cleanup policy** (prevents accumulating old images and hitting the 0.5 GB free tier):
+   - Artifact Registry → select the repository created for this service → Edit → Cleanup policies → Add policy
+   - Type: **Keep most recent versions** · Count: `3` → Save
 
 The service gets a `*.run.app` URL automatically. To use a custom domain, go to Cloud Run → service → **Custom domains**.
 

@@ -82,6 +82,38 @@ In Docker Desktop's env var UI, paste the raw JSON **without** surrounding singl
 
 `numericise_ignore` in `_TABLE_MAP` is a list of **1-based column indices** passed to `gspread.get_all_records()`. It prevents gspread from coercing those columns to numbers (used for AVG, OBP, SLG, OPS in baseball batting — columns 19–22 — and pitching rate stats — columns 10, 15–17). If the Google Sheet column order changes, these indices must be updated.
 
+## GCP Cloud Run Deployment
+
+**GCP project:** `prostars-369222` · **Region:** `us-west1`
+
+The new version runs as a **separate Cloud Run service** alongside the existing one. The existing service handles `www.theprostars.ca`; the new service gets its own `*.run.app` URL until ready to swap.
+
+### First deploy (via GCP Console)
+
+1. GCP Console → **Cloud Run** → **Create Service**
+2. Choose **"Continuously deploy from a repository"** → connect GitHub → select `nstoik/prostars`
+3. Branch: `main` · Build type: **Dockerfile** · Target: `prod-stage`
+4. Service name: `prostars-new` (keeps it separate from the existing service)
+5. Region: `us-west1`
+6. Under **Variables & Secrets**, add:
+   - `GOOGLE_CREDENTIALS` — full contents of the service account JSON (no surrounding quotes)
+   - `SECRET_KEY` — any long random string
+7. Allow unauthenticated requests → **Deploy**
+
+After this, every push to `main` automatically rebuilds and redeploys.
+
+### Swapping to production
+
+When ready to point `www.theprostars.ca` at the new service:
+1. Cloud Run → new service → **Custom domains** → map `www.theprostars.ca`
+2. Update DNS records as instructed (Cloud Run provides the CNAME/A records)
+3. Delete or stop the old service once traffic is confirmed healthy
+
+### Service account
+
+Service account email: `prostars-dev@prostars-369222.iam.gserviceaccount.com`
+The key is stored in `.env` locally. To generate a new key: GCP Console → IAM → Service Accounts → prostars-dev → Keys → Add Key.
+
 ## Known Limitations
 
 - No automated tests

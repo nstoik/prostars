@@ -127,11 +127,24 @@ Deployments are triggered automatically via GitHub integration — every push to
 
 The service gets a `*.run.app` URL automatically. To use a custom domain, go to Cloud Run → service → **Custom domains**.
 
-### Service account
+### Service accounts
 
-Email: `prostars-dev@prostars-369222.iam.gserviceaccount.com`
-
+**Sheets access — local dev** (`prostars-dev@prostars-369222.iam.gserviceaccount.com`)
+Used for local development only. Credentials stored in `.env` as `GOOGLE_CREDENTIALS`.
 To generate a new key: GCP Console → IAM → Service Accounts → prostars-dev → Keys → Add Key → JSON.
+
+**Sheets access — production** (`prostars-prod@prostars-369222.iam.gserviceaccount.com`)
+Used by Cloud Run services. Credentials stored in Secret Manager as `GOOGLE_CREDENTIALS`.
+
+**Cloud Build** (`cloud-build@prostars-369222.iam.gserviceaccount.com`)
+Required because newer GCP projects do not create the legacy Cloud Build SA automatically.
+
+One-time setup:
+1. IAM & Admin → Service Accounts → Create → name: `cloud-build`
+2. IAM & Admin → IAM → Grant Access → principal: `cloud-build@prostars-369222.iam.gserviceaccount.com`
+   - Role: `Editor`
+   - Role: `Service Account User`
+3. Cloud Build → Triggers → find the trigger → Edit → set **Service account** to `cloud-build@...` → Save → Run
 
 ---
 

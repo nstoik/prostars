@@ -44,7 +44,6 @@
   --accent-dim:   rgba(63, 185, 80, 0.15);
   --accent-deep:  #1a4d22;
   --hero-gradient: linear-gradient(135deg, #071a0b 0%, #0a1f0d 40%, #0d1117 100%);
-  --hero-icon: '⚾';
 }
 
 [data-sport="hockey"] {
@@ -54,7 +53,6 @@
   --accent-deep:  #0d2044;
   --accent-gold:  #d4a017;
   --hero-gradient: linear-gradient(135deg, #050e1f 0%, #0a1428 40%, #0d1117 100%);
-  --hero-icon: '🏒';
 }
 
 /* ── Global reset & base ────────────────────────────── */
@@ -231,8 +229,6 @@ a:hover { color: var(--accent-hover); }
   line-height: 1;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
 }
-
-.hero-text-wrap {}
 
 .hero-title {
   font-family: var(--font-display);
@@ -692,7 +688,6 @@ a:hover { color: var(--accent-hover); }
 .tabulator .tabulator-tableholder {
   background: var(--bg-surface);
   padding-bottom: 10px;
-  scrollbar-width: auto;
   scrollbar-color: var(--accent) var(--bg-elevated);
 }
 
@@ -1027,6 +1022,3 @@ a:hover { color: var(--accent-hover); }
   }
 }
 
-@media (max-width: 480px) {
-  .leaderboard-grid { grid-template-columns: 1fr 1fr; }
-}

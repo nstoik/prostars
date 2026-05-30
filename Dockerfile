@@ -51,5 +51,11 @@ COPY --from=build-stage --chown=${USER_UID}:${USER_GID} ${WORKING_DIR}/.venv ${W
 
 WORKDIR ${WORKING_DIR}
 ENV DEBIAN_FRONTEND=
+ENV PORT=8080
+ENV PYTHONPATH=${WORKING_DIR}
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD .venv/bin/python -c "import urllib.request, os; urllib.request.urlopen('http://localhost:' + os.environ.get('PORT', '8080') + '/')" || exit 1
 
 CMD exec .venv/bin/gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 prostars.wsgi:app

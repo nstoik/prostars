@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, abort, jsonify, render_template, request
 from flask_caching import Cache
 
 from prostars.data import fetch_all
@@ -32,6 +32,8 @@ def index():
 
 @app.route("/stats/<sport>/")
 def sport_stats(sport: str):
+    if sport not in _TABLE_MAP:
+        abort(404)
     return render_template(f"{sport}_stats.html", sport=sport)
 
 
@@ -46,8 +48,11 @@ def load_default_sport(sport: str):
     cache_key = f"data__{sport}__{table_id.lstrip('#')}"
     data = cache.get(cache_key)
     if data is None:
-        data = fetch_all(spreadsheet, worksheet, numericise_ignore)
-        cache.set(cache_key, data)
+        try:
+            data = fetch_all(spreadsheet, worksheet, numericise_ignore)
+            cache.set(cache_key, data)
+        except Exception as exc:
+            return jsonify(error=str(exc)), 502
 
     return jsonify(row_data=data, table_id=table_id)
 

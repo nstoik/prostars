@@ -10,7 +10,7 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 function getTopN(data, key, n, higherIsBetter) {
   const valid = data.filter(r => {
     const v = parseFloat(r[key]);
-    return !isNaN(v) && v !== 0;
+    return !isNaN(v) && v != null;
   });
   valid.sort((a, b) =>
     higherIsBetter
@@ -206,7 +206,7 @@ function initTabulator(tabConfig, data, onRowSelected) {
     initialSort: [{ column: sortField, dir: sortDir }],
     layout: "fitDataFill",
     pagination: true,
-    paginationSize: 10,
+    paginationSize: 25,
     paginationSizeSelector: [10, 25, 50, 100],
     paginationMode: "local",
     paginationCounter: "rows",
@@ -373,7 +373,7 @@ const prostarsApp = createApp({
 
       const years = [...new Set(data.map(r => String(r.Year)))].sort();
       const latestYear = years[years.length - 1];
-      f["Year"] = [latestYear];
+      if ("Year" in f) f["Year"] = [latestYear];
 
       if ("Season" in f) {
         const seasons = [

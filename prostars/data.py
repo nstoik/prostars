@@ -3,15 +3,21 @@ import os
 
 import gspread
 
+_client: gspread.Client | None = None
+
 
 def connect() -> gspread.Client:
+    global _client
+    if _client is not None:
+        return _client
     raw = os.environ.get("GOOGLE_CREDENTIALS")
     if not raw:
         raise EnvironmentError(
             "GOOGLE_CREDENTIALS environment variable is not set. "
             "See .env.example for setup instructions."
         )
-    return gspread.service_account_from_dict(json.loads(raw))
+    _client = gspread.service_account_from_dict(json.loads(raw))
+    return _client
 
 
 def fetch_all(

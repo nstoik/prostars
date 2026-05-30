@@ -21,7 +21,7 @@ docker build --target prod-stage -t prostars:local .
 docker run --rm -p 8080:8080 \
   -e PORT=8080 \
   -e SECRET_KEY=dev-local-key \
-  -e GOOGLE_CREDENTIALS="$(cat prostars/Prostars-c02b661b2a77.json)" \
+  -e GOOGLE_CREDENTIALS="$(cat /path/to/service-account.json)" \
   prostars:local
 ```
 

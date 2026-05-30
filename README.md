@@ -132,3 +132,33 @@ The service gets a `*.run.app` URL automatically. To use a custom domain, go to 
 Email: `prostars-dev@prostars-369222.iam.gserviceaccount.com`
 
 To generate a new key: GCP Console → IAM → Service Accounts → prostars-dev → Keys → Add Key → JSON.
+
+---
+
+## Cutover Checklist (when `prostars-new` becomes primary)
+
+Once `prostars-new` is stable and ready to replace the old service:
+
+#### DNS / custom domain
+
+- Cloud Run → `prostars-new` → Custom domains → map `www.theprostars.ca`
+- Update DNS records as instructed by Cloud Run (CNAME/A records)
+- Confirm traffic is healthy on the new service before removing the old one
+
+#### Decommission old service
+
+- Cloud Run → delete the old `prostars` service
+- Remove the old custom domain mapping from the deleted service if prompted
+
+#### Clean up this repo
+
+- Remove the `## Docker` section (Docker Hub push is replaced by GitHub → Cloud Run CI)
+- Remove any references to `gcloud run deploy` or manual image pushes
+- Delete `.gcloudignore` (only needed for the old `gcloud run deploy --source .` workflow)
+- Rename `prostars-new` references in this file to `prostars`
+- Remove this cutover checklist
+
+#### Optional cleanup
+
+- Delete the old Docker Hub image (`nstoik/prostars`) if no longer needed
+- Remove any Artifact Registry images from the old deployment pipeline if one existed

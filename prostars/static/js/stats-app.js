@@ -210,7 +210,7 @@ function initTabulator(tabConfig, data, onRowSelected) {
     paginationSizeSelector: [10, 25, 50, 100],
     paginationMode: "local",
     paginationCounter: "rows",
-    movableColumns: false,
+    movableColumns: true,
     responsiveLayout: false,
     selectableRows: 1,
   };
@@ -245,13 +245,19 @@ const prostarsApp = createApp({
     const isLoading      = ref({});
     const loadError      = ref({});
     const filterOpen     = ref(false);
+    const colPanelOpen   = ref(false);
     const filters        = ref({});
+    const columnVisibility = ref({});
     const selectedPlayer = ref(null);
 
     tabs.forEach(tab => {
       filters.value[tab.id] = {};
       tab.filterItems.forEach(item => {
         filters.value[tab.id][item] = [];
+      });
+      columnVisibility.value[tab.id] = {};
+      tab.headers.slice(1).forEach(h => {
+        columnVisibility.value[tab.id][h] = true;
       });
     });
 
@@ -446,6 +452,7 @@ const prostarsApp = createApp({
       selectedPlayer.value = null;
       activeTabId.value = tabId;
       filterOpen.value = false;
+      colPanelOpen.value = false;
       loadTab(tabId);
     }
 
@@ -469,6 +476,13 @@ const prostarsApp = createApp({
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
+      // Restore all hidden columns
+      const table = tabulatorInstances[tab.tableId];
+      const fieldMap = tab.fieldMap || {};
+      tab.headers.slice(1).forEach(h => {
+        columnVisibility.value[tab.id][h] = true;
+        if (table) table.showColumn(fieldMap[h] || h);
+      });
     }
 
     function selectAll(tabId, groupKey) {
@@ -489,6 +503,19 @@ const prostarsApp = createApp({
       const filtered = filteredData.value;
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
+    }
+
+    function toggleColumn(tabId, header) {
+      const tab = tabs.find(t => t.id === tabId);
+      if (!tab) return;
+      const visible = !columnVisibility.value[tabId][header];
+      columnVisibility.value[tabId][header] = visible;
+      const table = tabulatorInstances[tab.tableId];
+      if (!table) return;
+      const fieldMap = tab.fieldMap || {};
+      const field = fieldMap[header] || header;
+      if (visible) table.showColumn(field);
+      else table.hideColumn(field);
     }
 
     function closePanel() {
@@ -538,7 +565,10 @@ const prostarsApp = createApp({
       isLoading,
       loadError,
       filterOpen,
+      colPanelOpen,
       filters,
+      columnVisibility,
+      toggleColumn,
       activeTab,
       activeData,
       filteredData,

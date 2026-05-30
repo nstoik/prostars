@@ -1,92 +1,292 @@
-{% from 'helpers.html' import create_filter_section with context %}
-
 {% extends "stats_base.html" %}
 {% block content %}
-    
-<div class="row top-buffer"></div>
-<ul class="nav nav-pills nav-justified">
-	<li class="active">
-		<a data-toggle="pill" href="#baseball-players">Players</a>
-	</li>
-	<li class="">
-		<a data-toggle="pill" href="#baseball-pitchers">Pitchers</a>
-	</li>
-</ul>
-<div class="container">
-		<div class="tab-content">
-  			<div id="baseball-players" class="tab-pane fade in active">
-  			<h3>Player Stats</h3>
-		        {{ create_filter_section('baseball-players-filter') }}
-		        <div class="row row-spacing">
-		        </div>
-		        <div>
-		            <table id="baseball-players-table" class="table table-bordered table-striped table-condensed">
-		                <thead>
-		                    <tr>
-		                        <th>#</th>
-		                        <th>Name</th>
-		                        <th>Type</th>
-		                        <th>Division</th>
-		                        <th>Year</th>
-		                        <th>Season</th>
-		                        <th>League</th>
-		                        <th>Gender</th>
-		                        <th>G</th>
-		                        <th>H</th>
-		                        <th>AB</th>
-		                        <th>BB</th>
-		                        <th>R</th>
-		                        <th>1B</th>
-		                        <th>2B</th>
-		                        <th>3B</th>
-		                        <th>HR</th>
-		                        <th>RBI</th>
-								<th>SAC</th>
-								<th>AVG</th>
-								<th>OBP</th>
-								<th>SLG</th>
-								<th>OPS</th>
-		                    </tr>
-		                </thead>
-		                <tbody>
-		                </tbody>
-		            </table>
-		        </div>
-  			</div>
-  			<div id="baseball-pitchers" class="tab-pane fade">
-  				<h3>Pitcher Stats</h3>
-  				{{ create_filter_section('baseball-pitchers-filter') }}
-		        <div class="row row-spacing">
-		        </div>
-		        <div>
-		            <table id="baseball-pitchers-table" class="table table-bordered table-striped table-condensed">
-		                <thead>
-		                    <tr>
-		                        <th>#</th>
-		                        <th>Name</th>
-		                        <th>Type</th>
-		                        <th>Division</th>
-		                        <th>Year</th>
-		                        <th>Season</th>
-		                        <th>League</th>
-		                        <th>Gender</th>
-								<th>G</th>
-		                        <th>GS</th>
-		                        <th>IP</th>
-		                        <th>W</th>
-		                        <th>L</th>
-		                        <th>T</th>
-		                        <th>SV</th>
-		                        <th>RA</th>
-		                        <th>BB/7</th>
-		                        <th>K/7</th>
-		                    </tr>
-		                </thead>
-		                <tbody>
-		                </tbody>
-		            </table>
-		        </div>
-  			</div>
-		</div>
+
+<script>
+window.PROSTARS_CONFIG = {
+  sport: "baseball",
+  tabs: [
+    {
+      id: "baseball-players",
+      tableId: "baseball-players-table",
+      label: "Batters",
+      playerPanel: true,
+      filterItems: ["Name", "Type", "Division", "Year", "Season", "League", "Gender"],
+      headers: ["#","Name","Type","Division","Year","Season","League","Gender","G","H","AB","BB","R","1B","2B","3B","HR","RBI","SAC","AVG","OBP","SLG","OPS"],
+      headerTitles: {
+        "G":   "Games Played",
+        "H":   "Hits",
+        "AB":  "At Bats",
+        "BB":  "Walks (Base on Balls)",
+        "R":   "Runs Scored",
+        "1B":  "Singles",
+        "2B":  "Doubles",
+        "3B":  "Triples",
+        "HR":  "Home Runs",
+        "RBI": "Runs Batted In",
+        "SAC": "Sacrifice Hits",
+        "AVG": "Batting Average (H/AB)",
+        "OBP": "On-Base Percentage",
+        "SLG": "Slugging Percentage",
+        "OPS": "On-Base Plus Slugging"
+      },
+      defaultSort: { field: "AVG", dir: "desc" },
+      heatmapColumns: [
+        { key: "AVG", higherIsBetter: true },
+        { key: "HR",  higherIsBetter: true },
+        { key: "RBI", higherIsBetter: true },
+        { key: "OPS", higherIsBetter: true },
+        { key: "OBP", higherIsBetter: true }
+      ],
+      leaderStats: [
+        { key: "AVG", label: "Batting Avg",  higherIsBetter: true },
+        { key: "HR",  label: "Home Runs",    higherIsBetter: true },
+        { key: "RBI", label: "RBI",          higherIsBetter: true },
+        { key: "OPS", label: "OPS",          higherIsBetter: true }
+      ]
+    },
+    {
+      id: "baseball-pitchers",
+      tableId: "baseball-pitchers-table",
+      label: "Pitchers",
+      playerPanel: true,
+      filterItems: ["Name", "Type", "Division", "Year", "Season", "League", "Gender"],
+      headers: ["#","Name","Type","Division","Year","Season","League","Gender","G","GS","IP","W","L","T","SV","RA","BB/7","K/7"],
+      headerTitles: {
+        "G":    "Games Pitched",
+        "GS":   "Games Started",
+        "IP":   "Innings Pitched",
+        "W":    "Wins",
+        "L":    "Losses",
+        "T":    "Ties",
+        "SV":   "Saves",
+        "RA":   "Runs Allowed",
+        "BB/7": "Walks per 7 Innings",
+        "K/7":  "Strikeouts per 7 Innings"
+      },
+      defaultSort: { field: "K/7", dir: "desc" },
+      heatmapColumns: [
+        { key: "W",   higherIsBetter: true },
+        { key: "K/7", higherIsBetter: true },
+        { key: "RA",  higherIsBetter: false }
+      ],
+      leaderStats: [
+        { key: "W",   label: "Wins",      higherIsBetter: true },
+        { key: "K/7", label: "K/7 Inn",   higherIsBetter: true },
+        { key: "RA",  label: "Fewest RA", higherIsBetter: false }
+      ]
+    }
+  ]
+};
+</script>
+
+<div id="prostars-app" v-cloak>
+
+  <!-- Hero -->
+  <section class="sport-hero">
+    <div class="hero-inner">
+      <div class="hero-icon-wrap">⚾</div>
+      <div class="hero-text-wrap">
+        <h1 class="hero-title">Baseball Stats</h1>
+        <p class="hero-subtitle">Prostars</p>
+        <div class="hero-accent-bar"></div>
+      </div>
     </div>
+  </section>
+
+  <!-- Tab nav -->
+  <div class="sport-tabs-wrapper">
+    <ul class="sport-tabs nav">
+      <li class="nav-item" v-for="tab in tabs" :key="tab.id">
+        <button class="nav-link" :class="{ active: activeTabId === tab.id }"
+                @click="switchTab(tab.id)">[[ tab.label ]]</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab panes -->
+  <div v-for="tab in tabs" :key="tab.id" v-show="activeTabId === tab.id">
+
+    <!-- Loading -->
+    <div class="loading-overlay" v-if="isLoading[tab.id]">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading…</span>
+      </div>
+      <p>Loading stats…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-alert" v-if="loadError[tab.id]">
+      Failed to load stats: [[ loadError[tab.id] ]]
+    </div>
+
+    <!-- Leaderboard -->
+    <template v-if="activeTabId === tab.id && leaderboards.length > 0">
+      <div class="leaderboard-section">
+        <div class="leaderboard-inner">
+          <p class="leaderboard-heading">Leaders</p>
+          <div class="leaderboard-grid">
+            <div class="leader-card" v-for="board in leaderboards" :key="board.key">
+              <div class="leader-card-header">[[ board.label ]]</div>
+              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row">
+                <span class="leader-rank" :class="'leader-rank-' + leader.rank">[[ leader.rank ]]</span>
+                <span class="leader-name">[[ leader.name ]]</span>
+                <span class="leader-value">[[ formatStatValue(leader.value, board.key) ]]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Filter panel -->
+    <template v-if="activeTabId === tab.id && tabData[tab.id]">
+      <div class="filter-section">
+        <div class="filter-inner">
+          <div class="filter-bar">
+            <button class="filter-toggle-btn" :class="{ active: filterOpen }" @click="filterOpen = !filterOpen">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="flex-shrink:0">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+              Filters
+              <span class="filter-count-badge" v-if="activeFilterCount > 0">[[ activeFilterCount ]]</span>
+              <span class="filter-toggle-icon" :class="{ open: filterOpen }">▾</span>
+            </button>
+            <button class="btn-reset-filter" @click="resetFilters">Reset</button>
+          </div>
+
+          <div class="filter-chips" v-if="activeChips.length > 0">
+            <span class="filter-chip" v-for="chip in activeChips" :key="chip.key">
+              [[ chip.label ]]
+              <button class="filter-chip-remove" @click="removeChip(tab.id, chip.key)" title="Clear this filter">×</button>
+            </span>
+          </div>
+
+          <div class="filter-panel" v-show="filterOpen">
+            <div class="filter-groups">
+              <div v-for="group in filterGroups" :key="group.key">
+                <div class="filter-group-label">
+                  [[ group.key ]]
+                  <div class="filter-group-actions">
+                    <button class="filter-group-action-btn" @click="selectAll(tab.id, group.key)">All</button>
+                    <button class="filter-group-action-btn" @click="clearGroup(tab.id, group.key)">None</button>
+                  </div>
+                </div>
+                <div class="filter-options">
+                  <label class="filter-option" v-for="opt in group.options" :key="opt">
+                    <input type="checkbox" :value="opt" v-model="filters[tab.id][group.key]">
+                    [[ opt ]]
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="filter-footer">
+              <button class="btn-apply-filter" @click="applyFilters">Apply Filters</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Tabulator table -->
+    <div class="table-section" v-if="!isLoading[tab.id]">
+      <div class="table-inner">
+        <div :id="tab.tableId"></div>
+      </div>
+    </div>
+
+    <!-- Player panel — fixed overlay, batters tab only -->
+    <aside class="player-panel" v-if="selectedPlayer && tab.playerPanel"
+      @touchstart="onPanelTouchStart"
+      @touchmove.passive="onPanelTouchMove"
+      @touchend="onPanelTouchEnd">
+        <div class="pp-header">
+          <button class="pp-back" @click="closePanel">&#8592; Back</button>
+          <div class="pp-name">[[ selectedPlayer ]]</div>
+          <button class="pp-close" @click="closePanel" title="Close">×</button>
+        </div>
+
+        <div class="pp-meta" v-if="playerMeta">
+          <span><span class="pp-meta-dim">Type</span> [[ playerMeta.types ]]</span>
+          <span class="pp-meta-dim">·</span>
+          <span><span class="pp-meta-dim">Div</span> [[ playerMeta.divs ]]</span>
+          <span class="pp-meta-dim">·</span>
+          <span class="pp-meta-dim">[[ playerCareer.seasons ]] season[[ playerCareer.seasons !== 1 ? 's' : '' ]]</span>
+        </div>
+
+        <template v-if="playerCareer">
+          <div class="pp-section-label">Career</div>
+
+          <!-- Batter career grid -->
+          <div class="pp-career-grid" v-if="playerCareer.type === 'batter'">
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.G ]]</span><span class="pp-stat-key">G</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.AB ]]</span><span class="pp-stat-key">AB</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.H ]]</span><span class="pp-stat-key">H</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.HR ]]</span><span class="pp-stat-key">HR</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.RBI ]]</span><span class="pp-stat-key">RBI</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.R ]]</span><span class="pp-stat-key">R</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.AVG, 'AVG') ]]</span><span class="pp-stat-key">AVG</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.OBP, 'OBP') ]]</span><span class="pp-stat-key">OBP</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.OPS, 'OPS') ]]</span><span class="pp-stat-key">OPS</span></div>
+          </div>
+
+          <!-- Pitcher career grid -->
+          <div class="pp-career-grid" v-if="playerCareer.type === 'pitcher'">
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.G ]]</span><span class="pp-stat-key">G</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.GS ]]</span><span class="pp-stat-key">GS</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.IP ]]</span><span class="pp-stat-key">IP</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.W ]]</span><span class="pp-stat-key">W</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.L ]]</span><span class="pp-stat-key">L</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.SV ]]</span><span class="pp-stat-key">SV</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.RA ]]</span><span class="pp-stat-key">RA</span></div>
+          </div>
+
+          <div class="pp-section-label">By Season</div>
+          <div class="pp-seasons">
+
+            <!-- Batter season table -->
+            <table class="pp-season-table" v-if="playerCareer.type === 'batter'">
+              <thead>
+                <tr>
+                  <th>Year</th><th>Season</th>
+                  <th>G</th><th>AB</th><th>H</th>
+                  <th>HR</th><th>RBI</th><th>AVG</th><th>OPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(s, i) in playerSeasons" :key="i">
+                  <td>[[ s.Year ]]</td><td>[[ s.Season ]]</td>
+                  <td>[[ s.G ]]</td><td>[[ s.AB ]]</td><td>[[ s.H ]]</td>
+                  <td>[[ s.HR ]]</td><td>[[ s.RBI ]]</td>
+                  <td>[[ formatStatValue(s.AVG, 'AVG') ]]</td>
+                  <td>[[ formatStatValue(s.OPS, 'OPS') ]]</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Pitcher season table -->
+            <table class="pp-season-table" v-if="playerCareer.type === 'pitcher'">
+              <thead>
+                <tr>
+                  <th>Year</th><th>Season</th>
+                  <th>G</th><th>GS</th><th>IP</th>
+                  <th>W</th><th>L</th><th>SV</th><th>RA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(s, i) in playerSeasons" :key="i">
+                  <td>[[ s.Year ]]</td><td>[[ s.Season ]]</td>
+                  <td>[[ s.G ]]</td><td>[[ s.GS ]]</td><td>[[ s.IP ]]</td>
+                  <td>[[ s.W ]]</td><td>[[ s.L ]]</td><td>[[ s.SV ]]</td>
+                  <td>[[ s.RA ]]</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </template>
+      </aside>
+
+  </div><!-- end v-for tabs -->
+
+</div><!-- #prostars-app -->
 {% endblock %}

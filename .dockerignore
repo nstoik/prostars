@@ -5,4 +5,12 @@ README.md
 *.pyd
 __pycache__
 .pytest_cache
-.devcontainer/*
+.devcontainer/
+.venv/
+.env
+*credentials*.json
+*service_account*.json
+Prostars-*.json
+.git/
+.gitignore
+CLAUDE.md

@@ -1,6 +1,13 @@
-#Packages
-__pycache__
-
+# Python
+__pycache__/
 *.pyc
+*.pyo
+.venv/
 
+# Environment / secrets — never commit these
+.env
+*.json
+
+# Editor
 .vscode/*
+

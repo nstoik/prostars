@@ -476,13 +476,10 @@ const prostarsApp = createApp({
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
-      // Restore all hidden columns
+      // Reset column order and visibility
       const table = tabulatorInstances[tab.tableId];
-      const fieldMap = tab.fieldMap || {};
-      tab.headers.slice(1).forEach(h => {
-        columnVisibility.value[tab.id][h] = true;
-        if (table) table.showColumn(fieldMap[h] || h);
-      });
+      tab.headers.slice(1).forEach(h => { columnVisibility.value[tab.id][h] = true; });
+      if (table) table.setColumns(buildTabulatorColumns(tab));
     }
 
     function selectAll(tabId, groupKey) {

@@ -180,7 +180,6 @@ Once `prostars-new` is stable and ready to replace the old service:
 
 #### Clean up this repo
 
-- Delete `.gcloudignore` (only needed for the old `gcloud run deploy --source .` workflow)
 - Remove this cutover checklist
 
 #### Optional cleanup

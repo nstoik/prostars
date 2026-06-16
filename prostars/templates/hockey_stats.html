@@ -25,6 +25,8 @@ window.PROSTARS_CONFIG = {
       },
       fieldMap: { "+/-": "Plus_Minus" },
       defaultSort: { field: "P", dir: "desc" },
+      defaultHiddenColumns: ["Type", "Division", "Year", "Season", "Night", "Gender"],
+      mobileHiddenColumns: ["PPG", "SO_G", "SO_A", "SO_Pct"],
       heatmapColumns: [
         { key: "P", higherIsBetter: true },
         { key: "G", higherIsBetter: true },
@@ -56,6 +58,8 @@ window.PROSTARS_CONFIG = {
         "SO_SvPct": "Shootout Save Percentage"
       },
       defaultSort: { field: "W", dir: "desc" },
+      defaultHiddenColumns: ["Type", "Division", "Year", "Season", "Night", "Gender"],
+      mobileHiddenColumns: ["SOL", "SO_GA", "SO_Sv", "SO_SvPct"],
       heatmapColumns: [
         { key: "W",   higherIsBetter: true },
         { key: "GAA", higherIsBetter: false },

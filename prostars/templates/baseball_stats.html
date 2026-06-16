@@ -30,6 +30,8 @@ window.PROSTARS_CONFIG = {
         "OPS": "On-Base Plus Slugging"
       },
       defaultSort: { field: "AVG", dir: "desc" },
+      defaultHiddenColumns: ["Type", "Division", "Year", "Season", "League", "Gender"],
+      mobileHiddenColumns: ["BB", "R", "1B", "2B", "3B", "SAC", "OBP", "SLG"],
       heatmapColumns: [
         { key: "AVG", higherIsBetter: true },
         { key: "HR",  higherIsBetter: true },
@@ -64,6 +66,8 @@ window.PROSTARS_CONFIG = {
         "K/7":  "Strikeouts per 7 Innings"
       },
       defaultSort: { field: "K/7", dir: "desc" },
+      defaultHiddenColumns: ["Type", "Division", "Year", "Season", "League", "Gender"],
+      mobileHiddenColumns: ["T", "BB/7", "K/7"],
       heatmapColumns: [
         { key: "W",   higherIsBetter: true },
         { key: "K/7", higherIsBetter: true },

@@ -167,6 +167,20 @@ function buildTabulatorColumns(tabConfig) {
       headerTooltip: headerTitles[header] || header,
     };
 
+    if (isNameCol) {
+      col.formatter = function(cell) {
+        const name = cell.getValue();
+        if (!name) return "";
+        if (window.innerWidth <= 768) {
+          const parts = name.trim().split(/\s+/);
+          if (parts.length >= 2) {
+            return parts[0] + " " + parts[parts.length - 1][0] + ".";
+          }
+        }
+        return name;
+      };
+    }
+
     if (header === "IP") {
       col.sorter = function(a, b) { return ipToNum(a) - ipToNum(b); };
     }
@@ -191,7 +205,7 @@ function buildTabulatorColumns(tabConfig) {
   return columns;
 }
 
-function initTabulator(tabConfig, data, onRowSelected) {
+function initTabulator(tabConfig, data, onRowSelected, initialVisibility) {
   const tableId = tabConfig.tableId;
 
   if (tabulatorInstances[tableId]) {
@@ -216,6 +230,17 @@ function initTabulator(tabConfig, data, onRowSelected) {
   };
 
   const table = new Tabulator("#" + tableId, config);
+
+  if (initialVisibility) {
+    table.on("tableBuilt", () => {
+      Object.entries(initialVisibility).forEach(([header, visible]) => {
+        if (!visible) {
+          const field = (tabConfig.fieldMap && tabConfig.fieldMap[header]) || header;
+          table.hideColumn(field);
+        }
+      });
+    });
+  }
 
   if (onRowSelected) {
     table.on("rowClick", (e, row) => {
@@ -256,8 +281,13 @@ const prostarsApp = createApp({
         filters.value[tab.id][item] = [];
       });
       columnVisibility.value[tab.id] = {};
+      const isMobile = window.innerWidth <= 768;
+      const hidden = new Set([
+        ...(tab.defaultHiddenColumns || []),
+        ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
+      ]);
       tab.headers.slice(1).forEach(h => {
-        columnVisibility.value[tab.id][h] = true;
+        columnVisibility.value[tab.id][h] = !hidden.has(h);
       });
     });
 
@@ -437,7 +467,7 @@ const prostarsApp = createApp({
               }
             }
           : null;
-        initTabulator(tab, filteredData.value, onSel);
+        initTabulator(tab, filteredData.value, onSel, columnVisibility.value[tab.id]);
       } catch (err) {
         loadError.value = { ...loadError.value, [tabId]: err.message };
         console.error("Failed to load", tabId, err);
@@ -476,10 +506,25 @@ const prostarsApp = createApp({
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
-      // Reset column order and visibility
+      // Reset column order and visibility to defaults
       const table = tabulatorInstances[tab.tableId];
-      tab.headers.slice(1).forEach(h => { columnVisibility.value[tab.id][h] = true; });
-      if (table) table.setColumns(buildTabulatorColumns(tab));
+      const isMobile = window.innerWidth <= 768;
+      const hidden = new Set([
+        ...(tab.defaultHiddenColumns || []),
+        ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
+      ]);
+      tab.headers.slice(1).forEach(h => {
+        columnVisibility.value[tab.id][h] = !hidden.has(h);
+      });
+      if (table) {
+        table.setColumns(buildTabulatorColumns(tab));
+        tab.headers.slice(1).forEach(h => {
+          if (hidden.has(h)) {
+            const field = (tab.fieldMap && tab.fieldMap[h]) || h;
+            table.hideColumn(field);
+          }
+        });
+      }
     }
 
     function selectAll(tabId, groupKey) {

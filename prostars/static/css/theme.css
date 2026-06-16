@@ -684,6 +684,14 @@ a:hover { color: var(--accent-hover); }
   border-top-color: var(--accent) !important;
 }
 
+/* Active sort column header highlight */
+.tabulator .tabulator-header .tabulator-col[aria-sort="ascending"],
+.tabulator .tabulator-header .tabulator-col[aria-sort="descending"] {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
 /* Rows */
 .tabulator .tabulator-tableholder {
   background: var(--bg-surface);

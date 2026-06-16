@@ -526,7 +526,7 @@ a:hover { color: var(--accent-hover); }
 
 .filter-group-label {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -546,7 +546,7 @@ a:hover { color: var(--accent-hover); }
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
@@ -568,7 +568,7 @@ a:hover { color: var(--accent-hover); }
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.1rem 0.2rem;
@@ -580,8 +580,8 @@ a:hover { color: var(--accent-hover); }
 
 .filter-option input[type="checkbox"] {
   accent-color: var(--accent);
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 

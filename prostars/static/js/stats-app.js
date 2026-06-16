@@ -569,6 +569,14 @@ const prostarsApp = createApp({
       }
     }
 
+    function selectLeader(name) {
+      if (selectedPlayer.value === name) {
+        closePanel();
+      } else {
+        selectedPlayer.value = name;
+      }
+    }
+
     // Swipe-right-to-dismiss for mobile
     let _swipeStartX = 0;
 
@@ -630,6 +638,7 @@ const prostarsApp = createApp({
       playerMeta,
       playerCareer,
       closePanel,
+      selectLeader,
       onPanelTouchStart,
       onPanelTouchMove,
       onPanelTouchEnd,

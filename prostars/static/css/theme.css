@@ -379,6 +379,15 @@ a:hover { color: var(--accent-hover); }
   text-overflow: ellipsis;
 }
 
+.leader-row-link {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.leader-row-link:hover { background: var(--bg-elevated); }
+.leader-row-link:hover .leader-name { color: var(--accent); }
+
 .leader-value {
   font-family: var(--font-display);
   font-size: 1rem;

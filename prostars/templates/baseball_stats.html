@@ -131,7 +131,7 @@ window.PROSTARS_CONFIG = {
           <div class="leaderboard-grid">
             <div class="leader-card" v-for="board in leaderboards" :key="board.key">
               <div class="leader-card-header">[[ board.label ]]</div>
-              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row">
+              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row" :class="{ 'leader-row-link': tab.playerPanel }" @click="tab.playerPanel && selectLeader(leader.name)">
                 <span class="leader-rank" :class="'leader-rank-' + leader.rank">[[ leader.rank ]]</span>
                 <span class="leader-name">[[ leader.name ]]</span>
                 <span class="leader-value">[[ formatStatValue(leader.value, board.key) ]]</span>

@@ -673,7 +673,11 @@ const prostarsApp = createApp({
           headerTitles: { ...tab.headerTitles, Seasons: 'Career Seasons Played' },
         };
         computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
-        initTabulator(ltConfig, lifetimeData.value, onSel, columnVisibility.value[tab.id]);
+        const ltHeaders = new Set(tab.lifetimeHeaders.slice(1));
+        const ltVisibility = Object.fromEntries(
+          Object.entries(columnVisibility.value[tab.id]).filter(([h]) => ltHeaders.has(h))
+        );
+        initTabulator(ltConfig, lifetimeData.value, onSel, ltVisibility);
       } else {
         const filtered = filteredData.value;
         computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);

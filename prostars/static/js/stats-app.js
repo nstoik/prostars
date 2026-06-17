@@ -170,14 +170,17 @@ function buildTabulatorColumns(tabConfig) {
     if (isNameCol) {
       col.formatter = function(cell) {
         const name = cell.getValue();
-        if (!name) return "";
+        const el = document.createElement("span");
+        if (!name) return el;
         if (window.innerWidth <= 768) {
           const parts = name.trim().split(/\s+/);
           if (parts.length >= 2) {
-            return parts[0] + " " + parts[parts.length - 1][0] + ".";
+            el.textContent = parts[0] + " " + parts[parts.length - 1][0] + ".";
+            return el;
           }
         }
-        return name;
+        el.textContent = name;
+        return el;
       };
     }
 

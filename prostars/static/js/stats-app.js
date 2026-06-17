@@ -366,8 +366,8 @@ const prostarsApp = createApp({
       return { types: uniq('Type'), divs: uniq('Division') };
     });
 
-    // Career totals aggregated from all seasons
-    const playerCareer = computed(() => {
+    // Lifetime totals aggregated from all seasons
+    const playerLifetime = computed(() => {
       const rows = playerSeasons.value;
       if (!rows.length) return null;
       const tab = activeTab.value;
@@ -653,7 +653,7 @@ const prostarsApp = createApp({
       selectedPlayer,
       playerSeasons,
       playerMeta,
-      playerCareer,
+      playerLifetime,
       closePanel,
       selectLeader,
       onPanelTouchStart,

@@ -935,7 +935,7 @@ a:hover { color: var(--accent-hover); }
   padding: 0.65rem 1rem 0.35rem;
 }
 
-.pp-career-grid {
+.pp-lifetime-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin: 0 1rem 0.75rem;

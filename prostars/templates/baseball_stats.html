@@ -30,6 +30,10 @@ window.PROSTARS_CONFIG = {
         "OPS": "On-Base Plus Slugging"
       },
       defaultSort: { field: "AVG", dir: "desc" },
+      leaderGamesField: "G",
+      leaderMinGamesPct: 0.5,
+      defaultHiddenColumns: ["Type", "Division", "Year", "Season", "League", "Gender"],
+      mobileHiddenColumns: ["BB", "R", "1B", "2B", "3B", "SAC", "OBP", "SLG"],
       heatmapColumns: [
         { key: "AVG", higherIsBetter: true },
         { key: "HR",  higherIsBetter: true },
@@ -64,6 +68,10 @@ window.PROSTARS_CONFIG = {
         "K/7":  "Strikeouts per 7 Innings"
       },
       defaultSort: { field: "K/7", dir: "desc" },
+      leaderGamesField: "G",
+      leaderMinGamesPct: 0.5,
+      defaultHiddenColumns: ["Type", "Gender"],
+      mobileHiddenColumns: ["Division", "Year", "Season", "League", "T", "BB/7", "K/7"],
       heatmapColumns: [
         { key: "W",   higherIsBetter: true },
         { key: "K/7", higherIsBetter: true },
@@ -127,13 +135,14 @@ window.PROSTARS_CONFIG = {
           <div class="leaderboard-grid">
             <div class="leader-card" v-for="board in leaderboards" :key="board.key">
               <div class="leader-card-header">[[ board.label ]]</div>
-              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row">
+              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row" :class="{ 'leader-row-link': tab.playerPanel }" @click="tab.playerPanel && selectLeader(leader.name)">
                 <span class="leader-rank" :class="'leader-rank-' + leader.rank">[[ leader.rank ]]</span>
                 <span class="leader-name">[[ leader.name ]]</span>
                 <span class="leader-value">[[ formatStatValue(leader.value, board.key) ]]</span>
               </div>
             </div>
           </div>
+          <p class="leaderboard-qualifier" v-if="leaderMinGames">Min. [[ leaderMinGames ]] games to qualify</p>
         </div>
       </div>
     </template>
@@ -228,41 +237,41 @@ window.PROSTARS_CONFIG = {
           <span class="pp-meta-dim">·</span>
           <span><span class="pp-meta-dim">Div</span> [[ playerMeta.divs ]]</span>
           <span class="pp-meta-dim">·</span>
-          <span class="pp-meta-dim">[[ playerCareer.seasons ]] season[[ playerCareer.seasons !== 1 ? 's' : '' ]]</span>
+          <span class="pp-meta-dim">[[ playerLifetime.seasons ]] season[[ playerLifetime.seasons !== 1 ? 's' : '' ]]</span>
         </div>
 
-        <template v-if="playerCareer">
-          <div class="pp-section-label">Career</div>
+        <template v-if="playerLifetime">
+          <div class="pp-section-label">Lifetime</div>
 
-          <!-- Batter career grid -->
-          <div class="pp-career-grid" v-if="playerCareer.type === 'batter'">
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.G ]]</span><span class="pp-stat-key">G</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.AB ]]</span><span class="pp-stat-key">AB</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.H ]]</span><span class="pp-stat-key">H</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.HR ]]</span><span class="pp-stat-key">HR</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.RBI ]]</span><span class="pp-stat-key">RBI</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.R ]]</span><span class="pp-stat-key">R</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.AVG, 'AVG') ]]</span><span class="pp-stat-key">AVG</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.OBP, 'OBP') ]]</span><span class="pp-stat-key">OBP</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerCareer.OPS, 'OPS') ]]</span><span class="pp-stat-key">OPS</span></div>
+          <!-- Batter lifetime grid -->
+          <div class="pp-lifetime-grid" v-if="playerLifetime.type === 'batter'">
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.G ]]</span><span class="pp-stat-key">G</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.AB ]]</span><span class="pp-stat-key">AB</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.H ]]</span><span class="pp-stat-key">H</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.HR ]]</span><span class="pp-stat-key">HR</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.RBI ]]</span><span class="pp-stat-key">RBI</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.R ]]</span><span class="pp-stat-key">R</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerLifetime.AVG, 'AVG') ]]</span><span class="pp-stat-key">AVG</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerLifetime.OBP, 'OBP') ]]</span><span class="pp-stat-key">OBP</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ formatStatValue(playerLifetime.OPS, 'OPS') ]]</span><span class="pp-stat-key">OPS</span></div>
           </div>
 
-          <!-- Pitcher career grid -->
-          <div class="pp-career-grid" v-if="playerCareer.type === 'pitcher'">
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.G ]]</span><span class="pp-stat-key">G</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.GS ]]</span><span class="pp-stat-key">GS</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.IP ]]</span><span class="pp-stat-key">IP</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.W ]]</span><span class="pp-stat-key">W</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.L ]]</span><span class="pp-stat-key">L</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.SV ]]</span><span class="pp-stat-key">SV</span></div>
-            <div class="pp-stat"><span class="pp-stat-val">[[ playerCareer.RA ]]</span><span class="pp-stat-key">RA</span></div>
+          <!-- Pitcher lifetime grid -->
+          <div class="pp-lifetime-grid" v-if="playerLifetime.type === 'pitcher'">
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.G ]]</span><span class="pp-stat-key">G</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.GS ]]</span><span class="pp-stat-key">GS</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.IP ]]</span><span class="pp-stat-key">IP</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.W ]]</span><span class="pp-stat-key">W</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.L ]]</span><span class="pp-stat-key">L</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.SV ]]</span><span class="pp-stat-key">SV</span></div>
+            <div class="pp-stat"><span class="pp-stat-val">[[ playerLifetime.RA ]]</span><span class="pp-stat-key">RA</span></div>
           </div>
 
           <div class="pp-section-label">By Season</div>
           <div class="pp-seasons">
 
             <!-- Batter season table -->
-            <table class="pp-season-table" v-if="playerCareer.type === 'batter'">
+            <table class="pp-season-table" v-if="playerLifetime.type === 'batter'">
               <thead>
                 <tr>
                   <th>Year</th><th>Season</th>
@@ -282,7 +291,7 @@ window.PROSTARS_CONFIG = {
             </table>
 
             <!-- Pitcher season table -->
-            <table class="pp-season-table" v-if="playerCareer.type === 'pitcher'">
+            <table class="pp-season-table" v-if="playerLifetime.type === 'pitcher'">
               <thead>
                 <tr>
                   <th>Year</th><th>Season</th>

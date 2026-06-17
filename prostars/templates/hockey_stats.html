@@ -25,6 +25,10 @@ window.PROSTARS_CONFIG = {
       },
       fieldMap: { "+/-": "Plus_Minus" },
       defaultSort: { field: "P", dir: "desc" },
+      leaderGamesField: "GP",
+      leaderMinGamesPct: 0.5,
+      defaultHiddenColumns: ["Type", "Gender"],
+      mobileHiddenColumns: ["Division", "Year", "Season", "Night", "PPG", "SO_G", "SO_A", "SO_Pct"],
       heatmapColumns: [
         { key: "P", higherIsBetter: true },
         { key: "G", higherIsBetter: true },
@@ -56,6 +60,10 @@ window.PROSTARS_CONFIG = {
         "SO_SvPct": "Shootout Save Percentage"
       },
       defaultSort: { field: "W", dir: "desc" },
+      leaderGamesField: "GP",
+      leaderMinGamesPct: 0.5,
+      defaultHiddenColumns: ["Type", "Night", "Gender"],
+      mobileHiddenColumns: ["Division", "Year", "Season", "Night", "SOL", "SO_GA", "SO_Sv", "SO_SvPct"],
       heatmapColumns: [
         { key: "W",   higherIsBetter: true },
         { key: "GAA", higherIsBetter: false },
@@ -119,13 +127,14 @@ window.PROSTARS_CONFIG = {
           <div class="leaderboard-grid">
             <div class="leader-card" v-for="board in leaderboards" :key="board.key">
               <div class="leader-card-header">[[ board.label ]]</div>
-              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row">
+              <div v-for="(leader, idx) in board.leaders" :key="idx" class="leader-row" :class="{ 'leader-row-link': tab.playerPanel }" @click="tab.playerPanel && selectLeader(leader.name)">
                 <span class="leader-rank" :class="'leader-rank-' + leader.rank">[[ leader.rank ]]</span>
                 <span class="leader-name">[[ leader.name ]]</span>
                 <span class="leader-value">[[ formatStatValue(leader.value, board.key) ]]</span>
               </div>
             </div>
           </div>
+          <p class="leaderboard-qualifier" v-if="leaderMinGames">Min. [[ leaderMinGames ]] games to qualify</p>
         </div>
       </div>
     </template>

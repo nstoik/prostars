@@ -318,6 +318,13 @@ a:hover { color: var(--accent-hover); }
   margin: 0 0 1rem;
 }
 
+.leaderboard-qualifier {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0.75rem 0 0;
+  font-style: italic;
+}
+
 .leaderboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -378,6 +385,15 @@ a:hover { color: var(--accent-hover); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.leader-row-link {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.leader-row-link:hover { background: var(--bg-elevated); }
+.leader-row-link:hover .leader-name { color: var(--accent); }
 
 .leader-value {
   font-family: var(--font-display);
@@ -526,7 +542,7 @@ a:hover { color: var(--accent-hover); }
 
 .filter-group-label {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -546,7 +562,7 @@ a:hover { color: var(--accent-hover); }
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
@@ -568,7 +584,7 @@ a:hover { color: var(--accent-hover); }
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.1rem 0.2rem;
@@ -580,8 +596,8 @@ a:hover { color: var(--accent-hover); }
 
 .filter-option input[type="checkbox"] {
   accent-color: var(--accent);
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
@@ -682,6 +698,14 @@ a:hover { color: var(--accent-hover); }
 .tabulator .tabulator-header .tabulator-col.tabulator-col-sorter-element .tabulator-col-sorter .tabulator-arrow {
   border-bottom-color: var(--accent) !important;
   border-top-color: var(--accent) !important;
+}
+
+/* Active sort column header highlight */
+.tabulator .tabulator-header .tabulator-col[aria-sort="ascending"],
+.tabulator .tabulator-header .tabulator-col[aria-sort="descending"] {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
 }
 
 /* Rows */
@@ -810,23 +834,28 @@ a:hover { color: var(--accent-hover); }
 }
 
 /* ── Heatmap cell classes ────────────────────────────── */
-/* 10 levels: 0=worst, 9=best (direction-aware). */
-.tabulator-cell.cell-heat-0 { background: rgba(248, 81, 73,  0.55) !important; }
-.tabulator-cell.cell-heat-1 { background: rgba(248, 81, 73,  0.40) !important; }
-.tabulator-cell.cell-heat-2 { background: rgba(248, 81, 73,  0.25) !important; }
-.tabulator-cell.cell-heat-3 { background: rgba(248, 81, 73,  0.12) !important; }
-.tabulator-cell.cell-heat-4 { background: rgba(248, 81, 73,  0.04) !important; }
-.tabulator-cell.cell-heat-5 { background: rgba(63,  185, 80,  0.05) !important; }
-.tabulator-cell.cell-heat-6 { background: rgba(63,  185, 80,  0.14) !important; }
-.tabulator-cell.cell-heat-7 { background: rgba(63,  185, 80,  0.25) !important; }
-.tabulator-cell.cell-heat-8 { background: rgba(63,  185, 80,  0.38) !important; }
-.tabulator-cell.cell-heat-9 { background: rgba(63,  185, 80,  0.55) !important; }
+/* 10 levels: 0=worst, 9=best (direction-aware). All green, dim→bright. */
+.tabulator-cell.cell-heat-0 { background: rgba(63, 185, 80, 0.03) !important; }
+.tabulator-cell.cell-heat-1 { background: rgba(63, 185, 80, 0.07) !important; }
+.tabulator-cell.cell-heat-2 { background: rgba(63, 185, 80, 0.11) !important; }
+.tabulator-cell.cell-heat-3 { background: rgba(63, 185, 80, 0.16) !important; }
+.tabulator-cell.cell-heat-4 { background: rgba(63, 185, 80, 0.22) !important; }
+.tabulator-cell.cell-heat-5 { background: rgba(63, 185, 80, 0.28) !important; }
+.tabulator-cell.cell-heat-6 { background: rgba(63, 185, 80, 0.35) !important; }
+.tabulator-cell.cell-heat-7 { background: rgba(63, 185, 80, 0.42) !important; }
+.tabulator-cell.cell-heat-8 { background: rgba(63, 185, 80, 0.50) !important; }
+.tabulator-cell.cell-heat-9 { background: rgba(63, 185, 80, 0.60) !important; }
 
-[data-sport="hockey"] .tabulator-cell.cell-heat-5 { background: rgba(56, 139, 253, 0.05) !important; }
-[data-sport="hockey"] .tabulator-cell.cell-heat-6 { background: rgba(56, 139, 253, 0.14) !important; }
-[data-sport="hockey"] .tabulator-cell.cell-heat-7 { background: rgba(56, 139, 253, 0.25) !important; }
-[data-sport="hockey"] .tabulator-cell.cell-heat-8 { background: rgba(56, 139, 253, 0.38) !important; }
-[data-sport="hockey"] .tabulator-cell.cell-heat-9 { background: rgba(56, 139, 253, 0.55) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-0 { background: rgba(56, 139, 253, 0.03) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-1 { background: rgba(56, 139, 253, 0.07) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-2 { background: rgba(56, 139, 253, 0.11) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-3 { background: rgba(56, 139, 253, 0.16) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-4 { background: rgba(56, 139, 253, 0.22) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-5 { background: rgba(56, 139, 253, 0.28) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-6 { background: rgba(56, 139, 253, 0.35) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-7 { background: rgba(56, 139, 253, 0.42) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-8 { background: rgba(56, 139, 253, 0.50) !important; }
+[data-sport="hockey"] .tabulator-cell.cell-heat-9 { background: rgba(56, 139, 253, 0.60) !important; }
 
 /* ── Player panel (fixed overlay from right) ─────────── */
 .player-panel {
@@ -906,7 +935,7 @@ a:hover { color: var(--accent-hover); }
   padding: 0.65rem 1rem 0.35rem;
 }
 
-.pp-career-grid {
+.pp-lifetime-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin: 0 1rem 0.75rem;

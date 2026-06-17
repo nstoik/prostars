@@ -8,6 +8,7 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 // ── Utilities ────────────────────────────────────────────────
 
 const MOBILE_BREAKPOINT = 768;
+const LIFETIME_SKIP = new Set(['Year']);
 
 function getHiddenColumns(tab) {
   const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
@@ -149,6 +150,28 @@ function ipToNum(v) {
   return n;
 }
 
+function aggregateBatterRows(rows) {
+  const sum = k => rows.reduce((acc, r) => acc + (Number(r[k]) || 0), 0);
+  const G = sum('G'), AB = sum('AB'), H = sum('H'), BB = sum('BB');
+  const R = sum('R'), HR = sum('HR'), RBI = sum('RBI');
+  const s1 = sum('1B'), s2 = sum('2B'), s3 = sum('3B'), SAC = sum('SAC');
+  const AVG_n = AB > 0 ? H / AB : 0;
+  const OBP_n = (AB + BB) > 0 ? (H + BB) / (AB + BB) : 0;
+  const SLG_n = AB > 0 ? (s1 + 2*s2 + 3*s3 + 4*HR) / AB : 0;
+  return { G, AB, H, HR, RBI, R, BB, '1B': s1, '2B': s2, '3B': s3, SAC,
+           AVG: AVG_n.toFixed(3), OBP: OBP_n.toFixed(3),
+           SLG: SLG_n.toFixed(3), OPS: (OBP_n + SLG_n).toFixed(3),
+           Seasons: rows.length };
+}
+
+function aggregatePitcherRows(rows) {
+  const sum = k => rows.reduce((acc, r) => acc + (Number(r[k]) || 0), 0);
+  const G = sum('G'), GS = sum('GS'), W = sum('W'), L = sum('L');
+  const T = sum('T'), SV = sum('SV'), RA = sum('RA');
+  const IP = formatIP(rows.reduce((acc, r) => acc + ipToNum(r.IP), 0));
+  return { G, GS, IP, W, L, T, SV, RA, Seasons: rows.length };
+}
+
 function buildTabulatorColumns(tabConfig) {
   const { headers, headerTitles, fieldMap, heatmapColumns, tableId } = tabConfig;
   const heatFields = new Set((heatmapColumns || []).map(hc => hc.key));
@@ -283,6 +306,7 @@ const prostarsApp = createApp({
     const filters        = ref({});
     const columnVisibility = ref({});
     const selectedPlayer = ref(null);
+    const viewMode       = ref({});
 
     tabs.forEach(tab => {
       filters.value[tab.id] = {};
@@ -294,6 +318,14 @@ const prostarsApp = createApp({
       tab.headers.slice(1).forEach(h => {
         columnVisibility.value[tab.id][h] = !hidden.has(h);
       });
+      if (tab.lifetimeHeaders) {
+        tab.lifetimeHeaders.slice(1).forEach(h => {
+          if (!(h in columnVisibility.value[tab.id])) {
+            columnVisibility.value[tab.id][h] = true;
+          }
+        });
+      }
+      viewMode.value[tab.id] = 'season';
     });
 
     // ── Computed ──────────────────────────────────────────────
@@ -313,6 +345,26 @@ const prostarsApp = createApp({
       return filterData(activeData.value, filters.value[tab.id], tab.filterItems);
     });
 
+    const isLifetime = computed(() => viewMode.value[activeTabId.value] === 'lifetime');
+
+    // Lifetime rows: full dataset filtered by non-Year filters, then aggregated per player
+    const lifetimeData = computed(() => {
+      const tab = activeTab.value;
+      if (!tab || !activeData.value.length) return [];
+      const lifetimeItems = tab.filterItems.filter(f => !LIFETIME_SKIP.has(f));
+      const filtered = filterData(activeData.value, filters.value[tab.id], lifetimeItems);
+      const grouped = {};
+      filtered.forEach(r => {
+        if (!grouped[r.Name]) grouped[r.Name] = [];
+        grouped[r.Name].push(r);
+      });
+      const isPitcher = tab.id === 'baseball-pitchers';
+      return Object.entries(grouped).map(([name, rows]) => ({
+        Name: name,
+        ...(isPitcher ? aggregatePitcherRows(rows) : aggregateBatterRows(rows)),
+      }));
+    });
+
     const filterGroups = computed(() => {
       if (!activeData.value.length) return [];
       const tab = activeTab.value;
@@ -329,6 +381,7 @@ const prostarsApp = createApp({
     });
 
     const leaderMinGames = computed(() => {
+      if (isLifetime.value) return null;
       const tab = activeTab.value;
       if (!tab || !tab.leaderGamesField || !tab.leaderMinGamesPct || !filteredData.value.length) return null;
       const maxGames = Math.max(...filteredData.value.map(r => Number(r[tab.leaderGamesField]) || 0));
@@ -336,14 +389,20 @@ const prostarsApp = createApp({
     });
 
     const leaderboards = computed(() => {
-      if (!filteredData.value.length) return [];
       const tab = activeTab.value;
+      if (isLifetime.value) {
+        if (!lifetimeData.value.length) return [];
+        const stats = tab.lifetimeLeaderStats || tab.leaderStats;
+        return stats.map(stat => ({
+          ...stat,
+          leaders: getTopN(lifetimeData.value, stat.key, 3, stat.higherIsBetter),
+        }));
+      }
+      if (!filteredData.value.length) return [];
       let data = filteredData.value;
-
       if (leaderMinGames.value !== null) {
         data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= leaderMinGames.value);
       }
-
       return tab.leaderStats.map(stat => ({
         ...stat,
         leaders: getTopN(data, stat.key, 3, stat.higherIsBetter),
@@ -397,7 +456,10 @@ const prostarsApp = createApp({
       const tab = activeTab.value;
       if (!tab) return 0;
       const f = filters.value[tab.id];
-      return tab.filterItems.reduce((sum, item) => {
+      const items = isLifetime.value
+        ? tab.filterItems.filter(i => !LIFETIME_SKIP.has(i))
+        : tab.filterItems;
+      return items.reduce((sum, item) => {
         const sel = f[item] || [];
         const all = [...new Set((activeData.value || []).map(r => String(r[item])))];
         return sum + (sel.length > 0 && sel.length < all.length ? 1 : 0);
@@ -408,7 +470,10 @@ const prostarsApp = createApp({
       const tab = activeTab.value;
       if (!tab) return [];
       const f = filters.value[tab.id];
-      return tab.filterItems
+      const items = isLifetime.value
+        ? tab.filterItems.filter(i => !LIFETIME_SKIP.has(i))
+        : tab.filterItems;
+      return items
         .filter(item => {
           const sel = f[item] || [];
           const all = [...new Set((activeData.value || []).map(r => String(r[item])))];
@@ -470,16 +535,9 @@ const prostarsApp = createApp({
         tabData.value = { ...tabData.value, [tabId]: data };
         initDefaultFilters(tab, data);
 
-        // Compute heat scale from the filtered subset, then init table
-        computeHeatStats(tab.tableId, filteredData.value, tab.heatmapColumns || []);
-
         isLoading.value = { ...isLoading.value, [tabId]: false };
         await nextTick();
-
-        const onSel = tab.playerPanel
-          ? (d) => selectLeader(d.Name)
-          : null;
-        initTabulator(tab, filteredData.value, onSel, columnVisibility.value[tab.id]);
+        applyViewMode(tab);
       } catch (err) {
         loadError.value = { ...loadError.value, [tabId]: err.message };
         console.error("Failed to load", tabId, err);
@@ -502,22 +560,38 @@ const prostarsApp = createApp({
 
     function applyFilters() {
       const tab = activeTab.value;
-      const filtered = filteredData.value;
       selectedPlayer.value = null;
-      computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
-      applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
+      if (isLifetime.value) {
+        computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
+        applyTableData(tab.tableId, lifetimeData.value);
+      } else {
+        const filtered = filteredData.value;
+        computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
+        applyTableData(tab.tableId, filtered);
+      }
     }
 
     function resetFilters() {
       const tab = activeTab.value;
       const data = tabData.value[tab.id];
-      if (data) initDefaultFilters(tab, data);
       selectedPlayer.value = null;
+      filterOpen.value = false;
+      if (isLifetime.value) {
+        if (!data) return;
+        tab.filterItems.forEach(item => {
+          if (!LIFETIME_SKIP.has(item)) {
+            filters.value[tab.id][item] = [...new Set(data.map(r => String(r[item])))];
+          }
+        });
+        computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
+        applyTableData(tab.tableId, lifetimeData.value);
+        return;
+      }
+      if (data) initDefaultFilters(tab, data);
       const filtered = filteredData.value;
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
-      filterOpen.value = false;
       // Reset column order and visibility to defaults
       const table = tabulatorInstances[tab.tableId];
       const hidden = getHiddenColumns(tab);
@@ -550,9 +624,14 @@ const prostarsApp = createApp({
       const tab = tabs.find(t => t.id === tabId);
       if (!tab) return;
       selectAll(tabId, key);
-      const filtered = filteredData.value;
-      computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
-      applyTableData(tab.tableId, filtered);
+      if (isLifetime.value) {
+        computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
+        applyTableData(tab.tableId, lifetimeData.value);
+      } else {
+        const filtered = filteredData.value;
+        computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
+        applyTableData(tab.tableId, filtered);
+      }
     }
 
     function toggleColumn(tabId, header) {
@@ -583,6 +662,41 @@ const prostarsApp = createApp({
       } else {
         selectedPlayer.value = name;
       }
+    }
+
+    function applyViewMode(tab) {
+      const onSel = tab.playerPanel ? (d) => selectLeader(d.Name) : null;
+      if (viewMode.value[tab.id] === 'lifetime') {
+        const ltConfig = {
+          ...tab,
+          headers: tab.lifetimeHeaders,
+          defaultSort: tab.lifetimeDefaultSort || tab.defaultSort,
+          headerTitles: { ...tab.headerTitles, Seasons: 'Career Seasons Played' },
+        };
+        computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
+        initTabulator(ltConfig, lifetimeData.value, onSel, columnVisibility.value[tab.id]);
+      } else {
+        const filtered = filteredData.value;
+        computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
+        initTabulator(tab, filtered, onSel, columnVisibility.value[tab.id]);
+      }
+    }
+
+    function toggleViewMode() {
+      const tab = activeTab.value;
+      if (!tab || !tabData.value[tab.id]) return;
+      const goingLifetime = !isLifetime.value;
+      viewMode.value[tab.id] = goingLifetime ? 'lifetime' : 'season';
+      selectedPlayer.value = null;
+      filterOpen.value = false;
+      colPanelOpen.value = false;
+      if (goingLifetime) {
+        const data = tabData.value[tab.id];
+        tab.filterItems.forEach(item => {
+          filters.value[tab.id][item] = [...new Set(data.map(r => String(r[item])))];
+        });
+      }
+      nextTick(() => applyViewMode(tab));
     }
 
     // Swipe-right-to-dismiss for mobile
@@ -633,6 +747,8 @@ const prostarsApp = createApp({
       filterGroups,
       leaderboards,
       leaderMinGames,
+      isLifetime,
+      toggleViewMode,
       activeFilterCount,
       switchTab,
       applyFilters,

@@ -172,6 +172,9 @@ function aggregatePitcherRows(rows) {
   return { G, GS, IP, W, L, T, SV, RA, Seasons: rows.length };
 }
 
+// Columns that contain non-numeric string values and should not use numeric sorting
+const STRING_COLS = new Set(['Name', 'Type', 'Division', 'Year', 'Season', 'League', 'Gender', 'Night']);
+
 function buildTabulatorColumns(tabConfig) {
   const { headers, headerTitles, fieldMap, heatmapColumns, tableId } = tabConfig;
   const heatFields = new Set((heatmapColumns || []).map(hc => hc.key));
@@ -215,6 +218,8 @@ function buildTabulatorColumns(tabConfig) {
 
     if (header === "IP") {
       col.sorter = function(a, b) { return ipToNum(a) - ipToNum(b); };
+    } else if (!isNameCol && !STRING_COLS.has(header)) {
+      col.sorter = "number";
     }
 
     // Formatter reads heatStats at render time so scale updates with filters

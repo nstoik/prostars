@@ -433,23 +433,12 @@ const prostarsApp = createApp({
       const rows = playerSeasons.value;
       if (!rows.length) return null;
       const tab = activeTab.value;
-      const sum = k => rows.reduce((acc, r) => acc + (Number(r[k]) || 0), 0);
-
       if (tab && tab.id === 'baseball-pitchers') {
-        const G = sum('G'), GS = sum('GS'), W = sum('W'), L = sum('L'), SV = sum('SV'), RA = sum('RA');
-        const IP = formatIP(rows.reduce((acc, r) => acc + ipToNum(r.IP), 0));
-        return { type: 'pitcher', G, GS, IP, W, L, SV, RA, seasons: rows.length };
+        const { Seasons, ...rest } = aggregatePitcherRows(rows);
+        return { type: 'pitcher', seasons: Seasons, ...rest };
       }
-
-      // Batters (default)
-      const G   = sum('G'),  AB  = sum('AB'), H  = sum('H'),  BB = sum('BB');
-      const R   = sum('R'),  HR  = sum('HR'), RBI = sum('RBI');
-      const s1  = sum('1B'), s2  = sum('2B'), s3 = sum('3B');
-      const AVG = AB > 0 ? H / AB : 0;
-      const OBP = (AB + BB) > 0 ? (H + BB) / (AB + BB) : 0;
-      const SLG = AB > 0 ? (s1 + 2*s2 + 3*s3 + 4*HR) / AB : 0;
-      const OPS = OBP + SLG;
-      return { type: 'batter', G, AB, H, HR, RBI, R, AVG, OBP, SLG, OPS, seasons: rows.length };
+      const { Seasons, ...rest } = aggregateBatterRows(rows);
+      return { type: 'batter', seasons: Seasons, ...rest };
     });
 
     const activeFilterCount = computed(() => {

@@ -30,6 +30,8 @@ window.PROSTARS_CONFIG = {
         "OPS": "On-Base Plus Slugging"
       },
       defaultSort: { field: "AVG", dir: "desc" },
+      leaderGamesField: "G",
+      leaderMinGamesPct: 0.5,
       defaultHiddenColumns: ["Type", "Division", "Year", "Season", "League", "Gender"],
       mobileHiddenColumns: ["BB", "R", "1B", "2B", "3B", "SAC", "OBP", "SLG"],
       heatmapColumns: [
@@ -66,6 +68,8 @@ window.PROSTARS_CONFIG = {
         "K/7":  "Strikeouts per 7 Innings"
       },
       defaultSort: { field: "K/7", dir: "desc" },
+      leaderGamesField: "G",
+      leaderMinGamesPct: 0.5,
       defaultHiddenColumns: ["Type", "Gender"],
       mobileHiddenColumns: ["Division", "Year", "Season", "League", "T", "BB/7", "K/7"],
       heatmapColumns: [
@@ -138,6 +142,7 @@ window.PROSTARS_CONFIG = {
               </div>
             </div>
           </div>
+          <p class="leaderboard-qualifier" v-if="leaderMinGames">Min. [[ leaderMinGames ]] games to qualify</p>
         </div>
       </div>
     </template>

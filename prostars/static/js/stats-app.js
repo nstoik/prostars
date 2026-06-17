@@ -323,11 +323,27 @@ const prostarsApp = createApp({
       });
     });
 
+    const leaderMinGames = computed(() => {
+      const tab = activeTab.value;
+      if (!tab || !tab.leaderGamesField || !tab.leaderMinGamesPct || !filteredData.value.length) return null;
+      const maxGames = Math.max(...filteredData.value.map(r => Number(r[tab.leaderGamesField]) || 0));
+      return Math.ceil(maxGames * tab.leaderMinGamesPct);
+    });
+
     const leaderboards = computed(() => {
       if (!filteredData.value.length) return [];
-      return activeTab.value.leaderStats.map(stat => ({
+      const tab = activeTab.value;
+      let data = filteredData.value;
+
+      if (tab.leaderGamesField && tab.leaderMinGamesPct) {
+        const maxGames = Math.max(...data.map(r => Number(r[tab.leaderGamesField]) || 0));
+        const minGames = maxGames * tab.leaderMinGamesPct;
+        data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= minGames);
+      }
+
+      return tab.leaderStats.map(stat => ({
         ...stat,
-        leaders: getTopN(filteredData.value, stat.key, 3, stat.higherIsBetter),
+        leaders: getTopN(data, stat.key, 3, stat.higherIsBetter),
       }));
     });
 
@@ -624,6 +640,7 @@ const prostarsApp = createApp({
       filteredData,
       filterGroups,
       leaderboards,
+      leaderMinGames,
       activeFilterCount,
       switchTab,
       applyFilters,

@@ -318,6 +318,13 @@ a:hover { color: var(--accent-hover); }
   margin: 0 0 1rem;
 }
 
+.leaderboard-qualifier {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0.75rem 0 0;
+  font-style: italic;
+}
+
 .leaderboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

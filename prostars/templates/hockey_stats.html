@@ -25,6 +25,8 @@ window.PROSTARS_CONFIG = {
       },
       fieldMap: { "+/-": "Plus_Minus" },
       defaultSort: { field: "P", dir: "desc" },
+      leaderGamesField: "GP",
+      leaderMinGamesPct: 0.5,
       defaultHiddenColumns: ["Type", "Gender"],
       mobileHiddenColumns: ["Division", "Year", "Season", "Night", "PPG", "SO_G", "SO_A", "SO_Pct"],
       heatmapColumns: [
@@ -58,6 +60,8 @@ window.PROSTARS_CONFIG = {
         "SO_SvPct": "Shootout Save Percentage"
       },
       defaultSort: { field: "W", dir: "desc" },
+      leaderGamesField: "GP",
+      leaderMinGamesPct: 0.5,
       defaultHiddenColumns: ["Type", "Night", "Gender"],
       mobileHiddenColumns: ["Division", "Year", "Season", "Night", "SOL", "SO_GA", "SO_Sv", "SO_SvPct"],
       heatmapColumns: [
@@ -130,6 +134,7 @@ window.PROSTARS_CONFIG = {
               </div>
             </div>
           </div>
+          <p class="leaderboard-qualifier" v-if="leaderMinGames">Min. [[ leaderMinGames ]] games to qualify</p>
         </div>
       </div>
     </template>

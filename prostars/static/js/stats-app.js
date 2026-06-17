@@ -7,6 +7,16 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
 // ── Utilities ────────────────────────────────────────────────
 
+const MOBILE_BREAKPOINT = 768;
+
+function getHiddenColumns(tab) {
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+  return new Set([
+    ...(tab.defaultHiddenColumns || []),
+    ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
+  ]);
+}
+
 function getTopN(data, key, n, higherIsBetter) {
   const valid = data.filter(r => {
     const v = parseFloat(r[key]);
@@ -172,14 +182,10 @@ function buildTabulatorColumns(tabConfig) {
         const name = cell.getValue();
         const el = document.createElement("span");
         if (!name) return el;
-        if (window.innerWidth <= 768) {
-          const parts = name.trim().split(/\s+/);
-          if (parts.length >= 2) {
-            el.textContent = parts[0] + " " + parts[parts.length - 1][0] + ".";
-            return el;
-          }
-        }
-        el.textContent = name;
+        const parts = name.trim().split(/\s+/);
+        el.textContent = (window.innerWidth <= MOBILE_BREAKPOINT && parts.length >= 2)
+          ? parts[0] + " " + parts[parts.length - 1][0] + "."
+          : name;
         return el;
       };
     }
@@ -284,11 +290,7 @@ const prostarsApp = createApp({
         filters.value[tab.id][item] = [];
       });
       columnVisibility.value[tab.id] = {};
-      const isMobile = window.innerWidth <= 768;
-      const hidden = new Set([
-        ...(tab.defaultHiddenColumns || []),
-        ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
-      ]);
+      const hidden = getHiddenColumns(tab);
       tab.headers.slice(1).forEach(h => {
         columnVisibility.value[tab.id][h] = !hidden.has(h);
       });
@@ -338,10 +340,8 @@ const prostarsApp = createApp({
       const tab = activeTab.value;
       let data = filteredData.value;
 
-      if (tab.leaderGamesField && tab.leaderMinGamesPct) {
-        const maxGames = Math.max(...data.map(r => Number(r[tab.leaderGamesField]) || 0));
-        const minGames = maxGames * tab.leaderMinGamesPct;
-        data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= minGames);
+      if (leaderMinGames.value !== null) {
+        data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= leaderMinGames.value);
       }
 
       return tab.leaderStats.map(stat => ({
@@ -477,14 +477,7 @@ const prostarsApp = createApp({
         await nextTick();
 
         const onSel = tab.playerPanel
-          ? (d, row) => {
-              if (selectedPlayer.value === d.Name) {
-                selectedPlayer.value = null;
-                row.deselect();
-              } else {
-                selectedPlayer.value = d.Name;
-              }
-            }
+          ? (d) => selectLeader(d.Name)
           : null;
         initTabulator(tab, filteredData.value, onSel, columnVisibility.value[tab.id]);
       } catch (err) {
@@ -527,11 +520,7 @@ const prostarsApp = createApp({
       filterOpen.value = false;
       // Reset column order and visibility to defaults
       const table = tabulatorInstances[tab.tableId];
-      const isMobile = window.innerWidth <= 768;
-      const hidden = new Set([
-        ...(tab.defaultHiddenColumns || []),
-        ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
-      ]);
+      const hidden = getHiddenColumns(tab);
       tab.headers.slice(1).forEach(h => {
         columnVisibility.value[tab.id][h] = !hidden.has(h);
       });

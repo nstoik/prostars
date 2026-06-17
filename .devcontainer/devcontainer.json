@@ -12,7 +12,7 @@
 		"--name", "prostars-devcontainer"
 	],
 
-	"postCreateCommand": "git config --global user.email 'nelsonstoik@gmail.com' && git config --global user.name 'Nelson'",
+	"postCreateCommand": "git config --global user.email 'nelsonstoik@gmail.com' && git config --global user.name 'Nelson' && UV_LINK_MODE=copy uv sync",
 
 	"customizations": {
 		"vscode": {

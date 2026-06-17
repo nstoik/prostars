@@ -7,6 +7,16 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
 // ── Utilities ────────────────────────────────────────────────
 
+const MOBILE_BREAKPOINT = 768;
+
+function getHiddenColumns(tab) {
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+  return new Set([
+    ...(tab.defaultHiddenColumns || []),
+    ...(isMobile ? (tab.mobileHiddenColumns || []) : []),
+  ]);
+}
+
 function getTopN(data, key, n, higherIsBetter) {
   const valid = data.filter(r => {
     const v = parseFloat(r[key]);
@@ -167,6 +177,19 @@ function buildTabulatorColumns(tabConfig) {
       headerTooltip: headerTitles[header] || header,
     };
 
+    if (isNameCol) {
+      col.formatter = function(cell) {
+        const name = cell.getValue();
+        const el = document.createElement("span");
+        if (!name) return el;
+        const parts = name.trim().split(/\s+/);
+        el.textContent = (window.innerWidth <= MOBILE_BREAKPOINT && parts.length >= 2)
+          ? parts[0] + " " + parts[parts.length - 1][0] + "."
+          : name;
+        return el;
+      };
+    }
+
     if (header === "IP") {
       col.sorter = function(a, b) { return ipToNum(a) - ipToNum(b); };
     }
@@ -191,7 +214,7 @@ function buildTabulatorColumns(tabConfig) {
   return columns;
 }
 
-function initTabulator(tabConfig, data, onRowSelected) {
+function initTabulator(tabConfig, data, onRowSelected, initialVisibility) {
   const tableId = tabConfig.tableId;
 
   if (tabulatorInstances[tableId]) {
@@ -216,6 +239,17 @@ function initTabulator(tabConfig, data, onRowSelected) {
   };
 
   const table = new Tabulator("#" + tableId, config);
+
+  if (initialVisibility) {
+    table.on("tableBuilt", () => {
+      Object.entries(initialVisibility).forEach(([header, visible]) => {
+        if (!visible) {
+          const field = (tabConfig.fieldMap && tabConfig.fieldMap[header]) || header;
+          table.hideColumn(field);
+        }
+      });
+    });
+  }
 
   if (onRowSelected) {
     table.on("rowClick", (e, row) => {
@@ -256,8 +290,9 @@ const prostarsApp = createApp({
         filters.value[tab.id][item] = [];
       });
       columnVisibility.value[tab.id] = {};
+      const hidden = getHiddenColumns(tab);
       tab.headers.slice(1).forEach(h => {
-        columnVisibility.value[tab.id][h] = true;
+        columnVisibility.value[tab.id][h] = !hidden.has(h);
       });
     });
 
@@ -293,11 +328,25 @@ const prostarsApp = createApp({
       });
     });
 
+    const leaderMinGames = computed(() => {
+      const tab = activeTab.value;
+      if (!tab || !tab.leaderGamesField || !tab.leaderMinGamesPct || !filteredData.value.length) return null;
+      const maxGames = Math.max(...filteredData.value.map(r => Number(r[tab.leaderGamesField]) || 0));
+      return Math.ceil(maxGames * tab.leaderMinGamesPct);
+    });
+
     const leaderboards = computed(() => {
       if (!filteredData.value.length) return [];
-      return activeTab.value.leaderStats.map(stat => ({
+      const tab = activeTab.value;
+      let data = filteredData.value;
+
+      if (leaderMinGames.value !== null) {
+        data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= leaderMinGames.value);
+      }
+
+      return tab.leaderStats.map(stat => ({
         ...stat,
-        leaders: getTopN(filteredData.value, stat.key, 3, stat.higherIsBetter),
+        leaders: getTopN(data, stat.key, 3, stat.higherIsBetter),
       }));
     });
 
@@ -320,8 +369,8 @@ const prostarsApp = createApp({
       return { types: uniq('Type'), divs: uniq('Division') };
     });
 
-    // Career totals aggregated from all seasons
-    const playerCareer = computed(() => {
+    // Lifetime totals aggregated from all seasons
+    const playerLifetime = computed(() => {
       const rows = playerSeasons.value;
       if (!rows.length) return null;
       const tab = activeTab.value;
@@ -428,16 +477,9 @@ const prostarsApp = createApp({
         await nextTick();
 
         const onSel = tab.playerPanel
-          ? (d, row) => {
-              if (selectedPlayer.value === d.Name) {
-                selectedPlayer.value = null;
-                row.deselect();
-              } else {
-                selectedPlayer.value = d.Name;
-              }
-            }
+          ? (d) => selectLeader(d.Name)
           : null;
-        initTabulator(tab, filteredData.value, onSel);
+        initTabulator(tab, filteredData.value, onSel, columnVisibility.value[tab.id]);
       } catch (err) {
         loadError.value = { ...loadError.value, [tabId]: err.message };
         console.error("Failed to load", tabId, err);
@@ -476,10 +518,21 @@ const prostarsApp = createApp({
       computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
       applyTableData(tab.tableId, filtered);
       filterOpen.value = false;
-      // Reset column order and visibility
+      // Reset column order and visibility to defaults
       const table = tabulatorInstances[tab.tableId];
-      tab.headers.slice(1).forEach(h => { columnVisibility.value[tab.id][h] = true; });
-      if (table) table.setColumns(buildTabulatorColumns(tab));
+      const hidden = getHiddenColumns(tab);
+      tab.headers.slice(1).forEach(h => {
+        columnVisibility.value[tab.id][h] = !hidden.has(h);
+      });
+      if (table) {
+        table.setColumns(buildTabulatorColumns(tab));
+        tab.headers.slice(1).forEach(h => {
+          if (hidden.has(h)) {
+            const field = (tab.fieldMap && tab.fieldMap[h]) || h;
+            table.hideColumn(field);
+          }
+        });
+      }
     }
 
     function selectAll(tabId, groupKey) {
@@ -521,6 +574,14 @@ const prostarsApp = createApp({
       if (tab) {
         const table = tabulatorInstances[tab.tableId];
         if (table) table.deselectRow();
+      }
+    }
+
+    function selectLeader(name) {
+      if (selectedPlayer.value === name) {
+        closePanel();
+      } else {
+        selectedPlayer.value = name;
       }
     }
 
@@ -571,6 +632,7 @@ const prostarsApp = createApp({
       filteredData,
       filterGroups,
       leaderboards,
+      leaderMinGames,
       activeFilterCount,
       switchTab,
       applyFilters,
@@ -583,8 +645,9 @@ const prostarsApp = createApp({
       selectedPlayer,
       playerSeasons,
       playerMeta,
-      playerCareer,
+      playerLifetime,
       closePanel,
+      selectLeader,
       onPanelTouchStart,
       onPanelTouchMove,
       onPanelTouchEnd,

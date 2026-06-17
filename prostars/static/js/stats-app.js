@@ -250,7 +250,7 @@ function initTabulator(tabConfig, data, onRowSelected, initialVisibility) {
     data: data,
     columns: buildTabulatorColumns(tabConfig),
     initialSort: [{ column: sortField, dir: sortDir }],
-    layout: "fitDataStretch",
+    layout: "fitDataFill",
     pagination: true,
     paginationSize: 25,
     paginationSizeSelector: [10, 25, 50, 100],

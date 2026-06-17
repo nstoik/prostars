@@ -693,11 +693,13 @@ const prostarsApp = createApp({
       selectedPlayer.value = null;
       filterOpen.value = false;
       colPanelOpen.value = false;
+      const data = tabData.value[tab.id];
       if (goingLifetime) {
-        const data = tabData.value[tab.id];
         tab.filterItems.forEach(item => {
           filters.value[tab.id][item] = [...new Set(data.map(r => String(r[item])))];
         });
+      } else {
+        initDefaultFilters(tab, data);
       }
       nextTick(() => applyViewMode(tab));
     }

@@ -250,7 +250,7 @@ function initTabulator(tabConfig, data, onRowSelected, initialVisibility) {
     data: data,
     columns: buildTabulatorColumns(tabConfig),
     initialSort: [{ column: sortField, dir: sortDir }],
-    layout: "fitDataFill",
+    layout: "fitDataStretch",
     pagination: true,
     paginationSize: 25,
     paginationSizeSelector: [10, 25, 50, 100],
@@ -381,10 +381,11 @@ const prostarsApp = createApp({
     });
 
     const leaderMinGames = computed(() => {
-      if (isLifetime.value) return null;
       const tab = activeTab.value;
-      if (!tab || !tab.leaderGamesField || !tab.leaderMinGamesPct || !filteredData.value.length) return null;
-      const maxGames = Math.max(...filteredData.value.map(r => Number(r[tab.leaderGamesField]) || 0));
+      if (!tab || !tab.leaderGamesField || !tab.leaderMinGamesPct) return null;
+      const data = isLifetime.value ? lifetimeData.value : filteredData.value;
+      if (!data.length) return null;
+      const maxGames = Math.max(...data.map(r => Number(r[tab.leaderGamesField]) || 0));
       return Math.ceil(maxGames * tab.leaderMinGamesPct);
     });
 
@@ -392,10 +393,14 @@ const prostarsApp = createApp({
       const tab = activeTab.value;
       if (isLifetime.value) {
         if (!lifetimeData.value.length) return [];
+        let data = lifetimeData.value;
+        if (leaderMinGames.value !== null) {
+          data = data.filter(r => (Number(r[tab.leaderGamesField]) || 0) >= leaderMinGames.value);
+        }
         const stats = tab.lifetimeLeaderStats || tab.leaderStats;
         return stats.map(stat => ({
           ...stat,
-          leaders: getTopN(lifetimeData.value, stat.key, 3, stat.higherIsBetter),
+          leaders: getTopN(data, stat.key, 3, stat.higherIsBetter),
         }));
       }
       if (!filteredData.value.length) return [];

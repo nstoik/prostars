@@ -460,6 +460,37 @@ a:hover { color: var(--accent-hover); }
   line-height: 1.4;
 }
 
+.view-mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.view-mode-toggle button {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-mode-toggle button.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.view-mode-toggle button:hover:not(.active) {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
 .btn-reset-filter {
   background: transparent;
   border: 1px solid var(--border-subtle);

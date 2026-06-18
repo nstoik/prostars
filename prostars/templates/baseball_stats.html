@@ -46,7 +46,8 @@ window.PROSTARS_CONFIG = {
         { key: "HR",  label: "Home Runs",    higherIsBetter: true },
         { key: "RBI", label: "RBI",          higherIsBetter: true },
         { key: "OPS", label: "OPS",          higherIsBetter: true }
-      ]
+      ],
+      lifetimeHeaders: ["#","Name","Seasons","G","AB","H","HR","RBI","R","AVG","OBP","OPS"]
     },
     {
       id: "baseball-pitchers",
@@ -81,6 +82,12 @@ window.PROSTARS_CONFIG = {
         { key: "W",   label: "Wins",      higherIsBetter: true },
         { key: "K/7", label: "K/7 Inn",   higherIsBetter: true },
         { key: "RA",  label: "Fewest RA", higherIsBetter: false }
+      ],
+      lifetimeHeaders: ["#","Name","Seasons","G","GS","IP","W","L","T","SV","RA"],
+      lifetimeDefaultSort: { field: "W", dir: "desc" },
+      lifetimeLeaderStats: [
+        { key: "W",  label: "Wins",      higherIsBetter: true },
+        { key: "RA", label: "Fewest RA", higherIsBetter: false }
       ]
     }
   ]
@@ -160,6 +167,10 @@ window.PROSTARS_CONFIG = {
               <span class="filter-count-badge" v-if="activeFilterCount > 0">[[ activeFilterCount ]]</span>
               <span class="filter-toggle-icon" :class="{ open: filterOpen }">▾</span>
             </button>
+            <div class="view-mode-toggle" v-if="tab.lifetimeHeaders">
+              <button :class="{ active: !isLifetime }" @click="isLifetime && toggleViewMode()">Season</button>
+              <button :class="{ active: isLifetime }" @click="!isLifetime && toggleViewMode()">Lifetime</button>
+            </div>
             <button class="btn-reset-filter" @click="resetFilters">Reset</button>
             <button class="filter-toggle-btn" :class="{ active: colPanelOpen }" @click="colPanelOpen = !colPanelOpen" style="margin-left:auto">
               Columns
@@ -172,7 +183,7 @@ window.PROSTARS_CONFIG = {
               <div>
                 <div class="filter-group-label">Show / Hide Columns</div>
                 <div class="filter-options" style="flex-direction:row;flex-wrap:wrap;max-height:none">
-                  <label class="filter-option" v-for="h in tab.headers.slice(1)" :key="h">
+                  <label class="filter-option" v-for="h in (isLifetime ? tab.lifetimeHeaders : tab.headers).slice(1)" :key="h">
                     <input type="checkbox" :checked="columnVisibility[tab.id][h]" @change="toggleColumn(tab.id, h)">
                     [[ h ]]
                   </label>
@@ -190,21 +201,23 @@ window.PROSTARS_CONFIG = {
 
           <div class="filter-panel" v-show="filterOpen">
             <div class="filter-groups">
-              <div v-for="group in filterGroups" :key="group.key">
-                <div class="filter-group-label">
-                  [[ group.key ]]
-                  <div class="filter-group-actions">
-                    <button class="filter-group-action-btn" @click="selectAll(tab.id, group.key)">All</button>
-                    <button class="filter-group-action-btn" @click="clearGroup(tab.id, group.key)">None</button>
+              <template v-for="group in filterGroups" :key="group.key">
+                <div v-if="!isLifetime || group.key !== 'Year'">
+                  <div class="filter-group-label">
+                    [[ group.key ]]
+                    <div class="filter-group-actions">
+                      <button class="filter-group-action-btn" @click="selectAll(tab.id, group.key)">All</button>
+                      <button class="filter-group-action-btn" @click="clearGroup(tab.id, group.key)">None</button>
+                    </div>
+                  </div>
+                  <div class="filter-options">
+                    <label class="filter-option" v-for="opt in group.options" :key="opt">
+                      <input type="checkbox" :value="opt" v-model="filters[tab.id][group.key]">
+                      [[ opt ]]
+                    </label>
                   </div>
                 </div>
-                <div class="filter-options">
-                  <label class="filter-option" v-for="opt in group.options" :key="opt">
-                    <input type="checkbox" :value="opt" v-model="filters[tab.id][group.key]">
-                    [[ opt ]]
-                  </label>
-                </div>
-              </div>
+              </template>
             </div>
             <div class="filter-footer">
               <button class="btn-apply-filter" @click="applyFilters">Apply Filters</button>

@@ -18,6 +18,20 @@ The app runs at `http://127.0.0.1:5000`.
 
 ---
 
+## Player Name Mapping
+
+If a player's name changes (e.g. marriage), add an entry to `_NAME_MAP` in `prostars/app.py`:
+
+```python
+_NAME_MAP: dict[str, str] = {
+    "Old Name": "Current Name",
+}
+```
+
+The mapping is applied when data is fetched from Google Sheets, before caching. The sheet itself is never modified.
+
+---
+
 ## Google Sheets Credentials
 
 The app reads stats from two Google Sheets (`baseball_stats`, `Hockey_Stats`) using a GCP service account. Credentials are passed via the `GOOGLE_CREDENTIALS` environment variable — never committed to source control.

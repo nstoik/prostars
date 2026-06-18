@@ -15,6 +15,12 @@ if not app.secret_key:
 
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 900})
 
+# Maps historical names → current name so player stats aggregate correctly.
+# Add entries here when a player's name changes (e.g. marriage).
+_NAME_MAP: dict[str, str] = {
+    "Jessica Monk": "Jessica Nutbrown",
+}
+
 _TABLE_MAP: dict[str, dict[str, tuple[str, str, list[int] | None]]] = {
     "hockey": {
         "#hockey-players-table": ("Hockey_Stats", "Players", None),
@@ -52,6 +58,8 @@ def load_default_sport(sport: str):
     if data is None:
         try:
             data = fetch_all(spreadsheet, worksheet, numericise_ignore)
+            if _NAME_MAP:
+                data = [{**row, "Name": _NAME_MAP.get(row["Name"], row["Name"])} for row in data]
             cache.set(cache_key, data)
         except Exception as exc:
             return jsonify(error=str(exc)), 502

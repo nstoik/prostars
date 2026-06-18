@@ -65,22 +65,46 @@ In Docker Desktop's env var UI, paste the raw JSON **without** surrounding singl
 - `headers[0]` **must always be `"#"`** — the rank column. `buildTabulatorColumns` slices it off and handles it specially.
 - `fieldMap` in tab config maps display header names to actual data field names (e.g. `"+/-": "Plus_Minus"`).
 - `heatmapColumns` drives cell background coloring; `leaderStats` drives the leaderboard cards above the table. They are independent.
-- Pitcher vs batter detection in `playerCareer` is **hardcoded** to tab ID `'baseball-pitchers'`. If that tab ID changes, pitchers will render as batters silently.
+- Pitcher vs batter detection in `lifetimeData` and `playerLifetime` is **hardcoded** to tab ID `'baseball-pitchers'`. If that tab ID changes, pitchers will aggregate as batters silently.
 - `filterItems` drives both the filter panel checkbox groups and `initDefaultFilters`. The default filter pre-selects the latest year and most recent season; all other dimensions default to all-selected.
+- `defaultHiddenColumns` and `mobileHiddenColumns` in tab config set the initial column visibility; `getHiddenColumns(tab)` merges them based on screen width.
+- `leaderGamesField` and `leaderMinGamesPct` in tab config enable the min-games qualifier on leaderboard cards (e.g. `leaderMinGamesPct: 0.5` requires ≥ 50% of the max games played).
+
+### Lifetime table
+
+Adding `lifetimeHeaders` to a tab config enables the Season/Lifetime toggle for that tab. Additional optional fields:
+
+- `lifetimeHeaders` — column list for lifetime view (must start with `"#"`)
+- `lifetimeDefaultSort` — overrides `defaultSort` in lifetime mode
+- `lifetimeLeaderStats` — overrides `leaderStats` for lifetime leaderboard cards
+
+`LIFETIME_SKIP` (module-level constant, currently `['Year']`) lists filter dimensions excluded from lifetime mode. Lifetime data is grouped by `r.Name` and aggregated via `aggregateBatterRows` / `aggregatePitcherRows`.
 
 ## CSS Structure
 
 `prostars/static/css/theme.css` is the main stylesheet (~1000 lines). It is organized by sections (see comments):
 - CSS custom properties and sport-specific overrides (`[data-sport="baseball"]`, `[data-sport="hockey"]`)
 - `--accent` and `--hero-gradient` are the two key per-sport variables
-- Heatmap classes: `.cell-heat-0` (worst) through `.cell-heat-4` (best); `higherIsBetter` in config controls direction
+- Heatmap classes: `.cell-heat-0` (worst) through `.cell-heat-9` (best); `higherIsBetter` in config controls direction. All green for baseball, all blue for hockey.
 - Tabulator overrides are all scoped to `.tabulator` and `.tabulator-row`
+- Player panel lifetime grid uses `.pp-lifetime-grid`
 
 `custom.css` is minimal — only the `[v-cloak]` hide rule.
 
 ## Backend Column Config
 
 `numericise_ignore` in `_TABLE_MAP` is a list of **1-based column indices** passed to `gspread.get_all_records()`. It prevents gspread from coercing those columns to numbers (used for AVG, OBP, SLG, OPS in baseball batting — columns 19–22 — and pitching rate stats — columns 10, 15–17). If the Google Sheet column order changes, these indices must be updated.
+
+## Player Name Canonicalization
+
+`_NAME_MAP` in `app.py` translates historical player names to their current name (e.g. after a marriage name change). It is applied once after `fetch_all`, before the result is cached, so the frontend always sees the canonical name and player panel aggregation works correctly across all seasons. The Google Sheet is never modified.
+
+To add a mapping:
+```python
+_NAME_MAP: dict[str, str] = {
+    "Old Name": "Current Name",
+}
+```
 
 ## GCP Cloud Run Deployment
 

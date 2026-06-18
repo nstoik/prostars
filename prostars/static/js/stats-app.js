@@ -681,7 +681,11 @@ const prostarsApp = createApp({
       } else {
         const filtered = filteredData.value;
         computeHeatStats(tab.tableId, filtered, tab.heatmapColumns || []);
-        initTabulator(tab, filtered, onSel, columnVisibility.value[tab.id]);
+        const seasonHeaders = new Set(tab.headers.slice(1));
+        const seasonVisibility = Object.fromEntries(
+          Object.entries(columnVisibility.value[tab.id]).filter(([h]) => seasonHeaders.has(h))
+        );
+        initTabulator(tab, filtered, onSel, seasonVisibility);
       }
     }
 

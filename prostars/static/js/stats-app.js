@@ -576,6 +576,7 @@ const prostarsApp = createApp({
       const data = tabData.value[tab.id];
       selectedPlayer.value = null;
       filterOpen.value = false;
+      colPanelOpen.value = false;
       if (isLifetime.value) {
         if (!data) return;
         tab.filterItems.forEach(item => {
@@ -583,8 +584,11 @@ const prostarsApp = createApp({
             filters.value[tab.id][item] = [...new Set(data.map(r => String(r[item])))];
           }
         });
-        computeHeatStats(tab.tableId, lifetimeData.value, tab.heatmapColumns || []);
-        applyTableData(tab.tableId, lifetimeData.value);
+        const hidden = getHiddenColumns(tab);
+        tab.lifetimeHeaders.slice(1).forEach(h => {
+          columnVisibility.value[tab.id][h] = !hidden.has(h);
+        });
+        applyViewMode(tab);
         return;
       }
       if (data) initDefaultFilters(tab, data);

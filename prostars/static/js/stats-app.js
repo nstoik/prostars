@@ -167,9 +167,15 @@ function aggregateBatterRows(rows) {
 function aggregatePitcherRows(rows) {
   const sum = k => rows.reduce((acc, r) => acc + (Number(r[k]) || 0), 0);
   const G = sum('G'), GS = sum('GS'), W = sum('W'), L = sum('L');
-  const T = sum('T'), SV = sum('SV'), RA = sum('RA');
-  const IP = formatIP(rows.reduce((acc, r) => acc + ipToNum(r.IP), 0));
-  return { G, GS, IP, W, L, T, SV, RA, Seasons: rows.length };
+  const T = sum('T'), SV = sum('SV');
+  const totalIP = rows.reduce((acc, r) => acc + ipToNum(r.IP), 0);
+  const IP = formatIP(totalIP);
+  // RA is runs allowed per 7 innings, not a raw count — weight each season's
+  // rate by its innings pitched rather than summing the rates directly.
+  const RA_n = totalIP > 0
+    ? rows.reduce((acc, r) => acc + (Number(r.RA) || 0) * ipToNum(r.IP), 0) / totalIP
+    : 0;
+  return { G, GS, IP, W, L, T, SV, RA: RA_n.toFixed(2), Seasons: rows.length };
 }
 
 // Columns that contain non-numeric string values and should not use numeric sorting

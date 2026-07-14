@@ -1,4 +1,4 @@
-FROM python:3.11 AS build-stage
+FROM python:3.14 AS build-stage
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -21,7 +21,7 @@ RUN uv sync --no-dev --no-install-project
 
 
 # prod stage — slim image, venv copied from build stage
-FROM python:3.11-slim AS prod-stage
+FROM python:3.14-slim AS prod-stage
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8

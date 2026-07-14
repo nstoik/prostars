@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
+from typing import TYPE_CHECKING
 
-import gspread
+if TYPE_CHECKING:
+    import gspread
 
 _client: gspread.Client | None = None
 
@@ -10,6 +14,8 @@ def connect() -> gspread.Client:
     global _client
     if _client is not None:
         return _client
+    import gspread
+
     raw = os.environ.get("GOOGLE_CREDENTIALS")
     if not raw:
         raise EnvironmentError(

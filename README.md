@@ -122,8 +122,8 @@ Deployments are triggered automatically — every push to the connected branch r
 
 | Service | Branch | URL |
 |---------|--------|-----|
-| `prostars` | `main` | `www.theprostars.ca` |
-| `prostars-dev` | `dev` | `*.run.app` |
+| `prostars-new` | `main` | `theprostars.ca`, `www.theprostars.ca` |
+| `prostars-dev` | `dev` | `dev.theprostars.ca` |
 
 ### First deploy (one-time setup via GCP Console)
 
@@ -131,15 +131,22 @@ Deployments are triggered automatically — every push to the connected branch r
 2. Choose **"Continuously deploy from a repository"** → connect GitHub → select `nstoik/prostars`
 3. Branch: `main` or `dev` · Build type: **Dockerfile**
 4. Region: `us-west1`
-5. Under **Variables & Secrets**, reference secrets from Secret Manager:
+5. Under **Variables & Secrets** → **Secrets** section, click **Reference a Secret** for each:
 
-| Variable | Secret |
-|---|---|
-| `GOOGLE_CREDENTIALS` | `GOOGLE_CREDENTIALS` (use `prostars-prod` SA key) |
-| `SECRET_KEY` | `SECRET_KEY` |
+| Variable | Secret | Version |
+|---|---|---|
+| `GOOGLE_CREDENTIALS` | `GOOGLE_CREDENTIALS` (use `prostars-prod` SA key) | `latest` |
+| `SECRET_KEY` | `SECRET_KEY` | `latest` |
 
-6. Allow unauthenticated requests → **Deploy**
-7. **Set Artifact Registry cleanup policy** (prevents accumulating old images and hitting the 0.5 GB free tier):
+   Set **Reference method** to **"Exposed as environment variable"** for each, with the environment variable name matching the table above.
+
+6. **Grant the service's runtime service account access to each secret** (easy to miss — without this the deploy succeeds but the container fails to start):
+   - Secret Manager → select the secret → **Permissions** tab → **Grant Access**
+   - Principal: the service's runtime SA (see service's **Security** tab; typically `prostars-prod@prostars-369222.iam.gserviceaccount.com`)
+   - Role: **Secret Manager Secret Accessor**
+
+7. Allow unauthenticated requests → **Deploy**
+8. **Set Artifact Registry cleanup policy** (prevents accumulating old images and hitting the 0.5 GB free tier):
    - Artifact Registry → select the repository created for this service → Edit → Cleanup policies → Add policy
    - Type: **Keep most recent versions** · Count: `3` → Save
 
@@ -164,27 +171,3 @@ One-time setup:
    - Role: `Service Account User`
 3. Cloud Build → Triggers → find the trigger → Edit → set **Service account** to `cloud-build@...` → Save → Run
 
----
-
-## Cutover Checklist (when `prostars-new` becomes primary)
-
-Once `prostars-new` is stable and ready to replace the old service:
-
-#### DNS / custom domain
-
-- Cloud Run → `prostars-new` → Custom domains → map `www.theprostars.ca`
-- Update DNS records as instructed by Cloud Run (CNAME/A records)
-- Confirm traffic is healthy on the new service before removing the old one
-
-#### Decommission old service
-
-- Cloud Run → delete the old `prostars` service
-- Remove the old custom domain mapping from the deleted service if prompted
-
-#### Clean up this repo
-
-- Remove this cutover checklist
-
-#### Optional cleanup
-
-- Delete the old Docker Hub image (`nstoik/prostars`) if no longer needed

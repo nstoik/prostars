@@ -20,16 +20,6 @@ WORKDIR ${WORKING_DIR}
 RUN uv sync --no-dev --no-install-project
 
 
-# dev stage — includes dev deps and full source
-FROM build-stage AS dev-stage
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-COPY --chown=${USER_UID}:${USER_GID} . ${WORKING_DIR}/
-RUN uv sync --no-install-project
-ENV DEBIAN_FRONTEND=
-CMD ["/bin/bash"]
-
-
 # prod stage — slim image, venv copied from build stage
 FROM python:3.11-slim AS prod-stage
 ENV DEBIAN_FRONTEND=noninteractive

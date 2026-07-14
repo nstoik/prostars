@@ -110,34 +110,14 @@ _NAME_MAP: dict[str, str] = {
 
 **GCP project:** `prostars-369222` · **Region:** `us-west1`
 
-The new version runs as a **separate Cloud Run service** alongside the existing one. The existing service handles `www.theprostars.ca`; the new service gets its own `*.run.app` URL until ready to swap.
+Two live Cloud Run services, each continuously deployed from GitHub:
 
-### First deploy (via GCP Console)
+| Service | Branch | URL |
+|---------|--------|-----|
+| `prostars-new` | `main` | `theprostars.ca`, `www.theprostars.ca` |
+| `prostars-dev` | `dev` | `dev.theprostars.ca` |
 
-1. GCP Console → **Cloud Run** → **Create Service**
-2. Choose **"Continuously deploy from a repository"** → connect GitHub → select `nstoik/prostars`
-3. Branch: `main` · Build type: **Dockerfile** · Target: `prod-stage`
-4. Service name: `prostars-new` (keeps it separate from the existing service)
-5. Region: `us-west1`
-6. Under **Variables & Secrets**, add:
-   - `GOOGLE_CREDENTIALS` — full contents of the service account JSON (no surrounding quotes)
-   - `SECRET_KEY` — any long random string
-7. Allow unauthenticated requests → **Deploy**
-
-After this, every push to `main` automatically rebuilds and redeploys.
-
-### Swapping to production
-
-When ready to point `www.theprostars.ca` at the new service:
-1. Cloud Run → new service → **Custom domains** → map `www.theprostars.ca`
-2. Update DNS records as instructed (Cloud Run provides the CNAME/A records)
-3. Delete or stop the old service once traffic is confirmed healthy
-4. Delete the old `prostars-1215` GCP project from the personal account (GCP Console → IAM & Admin → Settings → Shut down project)
-
-### Service account
-
-Service account email: `prostars-dev@prostars-369222.iam.gserviceaccount.com`
-The key is stored in `.env` locally. To generate a new key: GCP Console → IAM → Service Accounts → prostars-dev → Keys → Add Key.
+Every push to the connected branch automatically rebuilds and redeploys. Secrets (`GOOGLE_CREDENTIALS`, `SECRET_KEY`) are referenced from **Secret Manager** as env vars — the service's runtime SA needs the **Secret Manager Secret Accessor** role on each secret, or the container fails to start. See `README.md` for the full one-time setup walkthrough (creating a new service, wiring secrets, Artifact Registry cleanup policy, service accounts).
 
 ## Known Limitations
 

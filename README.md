@@ -97,23 +97,18 @@ uv add <package> # add a new dependency
 
 ## Docker
 
-Build the dev image:
+Build locally for testing:
 
 ```bash
-docker build --tag nstoik/prostars:dev --target dev-stage .
+docker build --target prod-stage -t prostars:local .
+docker run --rm -p 8080:8080 \
+  -e PORT=8080 \
+  -e SECRET_KEY=dev-local-key \
+  -e GOOGLE_CREDENTIALS="$(cat /path/to/service-account.json)" \
+  prostars:local
 ```
 
-Build the production image:
-
-```bash
-docker build --tag nstoik/prostars:latest --target prod-stage .
-```
-
-Push to Docker Hub:
-
-```bash
-docker push nstoik/prostars:latest
-```
+Production deployments are handled automatically via GitHub → Cloud Run CI. No manual image push needed.
 
 ---
 
@@ -121,23 +116,39 @@ docker push nstoik/prostars:latest
 
 **GCP project:** `prostars-369222` · **Region:** `us-west1`
 
-Deployments are triggered automatically via GitHub integration — every push to `main` rebuilds and redeploys.
+Deployments are triggered automatically — every push to the connected branch rebuilds and redeploys.
+
+### Services
+
+| Service | Branch | URL |
+|---------|--------|-----|
+| `prostars-new` | `main` | `theprostars.ca`, `www.theprostars.ca` |
+| `prostars-dev` | `dev` | `dev.theprostars.ca` |
 
 ### First deploy (one-time setup via GCP Console)
 
 1. GCP Console → **Cloud Run** → **Create Service**
 2. Choose **"Continuously deploy from a repository"** → connect GitHub → select `nstoik/prostars`
-3. Branch: `main` · Build type: **Dockerfile** · Docker target: `prod-stage`
-4. Service name: `prostars-new` (keeps it separate from the existing live service)
-5. Region: `us-west1`
-6. Under **Variables & Secrets**, add:
+3. Branch: `main` or `dev` · Build type: **Dockerfile**
+4. Region: `us-west1`
+5. Under **Variables & Secrets** → **Secrets** section, click **Reference a Secret** for each:
 
-| Variable | Value |
-|---|---|
-| `GOOGLE_CREDENTIALS` | Full contents of the service account JSON (no surrounding quotes) |
-| `SECRET_KEY` | A long random string |
+| Variable | Secret | Version |
+|---|---|---|
+| `GOOGLE_CREDENTIALS` | `GOOGLE_CREDENTIALS` (use `prostars-prod` SA key) | `latest` |
+| `SECRET_KEY` | `SECRET_KEY` | `latest` |
+
+   Set **Reference method** to **"Exposed as environment variable"** for each, with the environment variable name matching the table above.
+
+6. **Grant the service's runtime service account access to each secret** (easy to miss — without this the deploy succeeds but the container fails to start):
+   - Secret Manager → select the secret → **Permissions** tab → **Grant Access**
+   - Principal: the service's runtime SA (see service's **Security** tab; typically `prostars-prod@prostars-369222.iam.gserviceaccount.com`)
+   - Role: **Secret Manager Secret Accessor**
 
 7. Allow unauthenticated requests → **Deploy**
+8. **Set Artifact Registry cleanup policy** (prevents accumulating old images and hitting the 0.5 GB free tier):
+   - Artifact Registry → select the repository created for this service → Edit → Cleanup policies → Add policy
+   - Type: **Keep most recent versions** · Count: `3` → Save
 
 The service gets a `*.run.app` URL automatically. To use a custom domain, go to Cloud Run → service → **Custom domains**.
 
@@ -160,32 +171,3 @@ One-time setup:
    - Role: `Service Account User`
 3. Cloud Build → Triggers → find the trigger → Edit → set **Service account** to `cloud-build@...` → Save → Run
 
----
-
-## Cutover Checklist (when `prostars-new` becomes primary)
-
-Once `prostars-new` is stable and ready to replace the old service:
-
-#### DNS / custom domain
-
-- Cloud Run → `prostars-new` → Custom domains → map `www.theprostars.ca`
-- Update DNS records as instructed by Cloud Run (CNAME/A records)
-- Confirm traffic is healthy on the new service before removing the old one
-
-#### Decommission old service
-
-- Cloud Run → delete the old `prostars` service
-- Remove the old custom domain mapping from the deleted service if prompted
-
-#### Clean up this repo
-
-- Remove the `## Docker` section (Docker Hub push is replaced by GitHub → Cloud Run CI)
-- Remove any references to `gcloud run deploy` or manual image pushes
-- Delete `.gcloudignore` (only needed for the old `gcloud run deploy --source .` workflow)
-- Rename `prostars-new` references in this file to `prostars`
-- Remove this cutover checklist
-
-#### Optional cleanup
-
-- Delete the old Docker Hub image (`nstoik/prostars`) if no longer needed
-- Remove any Artifact Registry images from the old deployment pipeline if one existed

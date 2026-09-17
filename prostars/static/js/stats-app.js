@@ -10,6 +10,18 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 const MOBILE_BREAKPOINT = 768;
 const LIFETIME_SKIP = new Set(['Year']);
 
+// Chronological order for the "Season" column. A plain alphabetical sort
+// puts "Fall" before "Summer", which picks the wrong "most recent season"
+// as the default filter whenever a year has both.
+const SEASON_ORDER = ['NA', 'Spring', 'Summer', 'Fall', 'Winter'];
+
+function compareSeasons(a, b) {
+  const ai = SEASON_ORDER.indexOf(a);
+  const bi = SEASON_ORDER.indexOf(b);
+  if (ai === -1 || bi === -1) return a.localeCompare(b);
+  return ai - bi;
+}
+
 function getHiddenColumns(tab) {
   const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
   return new Set([
@@ -497,7 +509,7 @@ const prostarsApp = createApp({
             data.filter(r => String(r.Year) === latestYear)
                 .map(r => String(r.Season))
           ),
-        ].sort();
+        ].sort(compareSeasons);
         f["Season"] = [seasons[seasons.length - 1]];
       }
 

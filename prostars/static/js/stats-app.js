@@ -13,7 +13,7 @@ const LIFETIME_SKIP = new Set(['Year']);
 // Chronological order for the "Season" column. A plain alphabetical sort
 // puts "Fall" before "Summer", which picks the wrong "most recent season"
 // as the default filter whenever a year has both.
-const SEASON_ORDER = ['NA', 'Spring', 'Summer', 'Fall', 'Winter'];
+const SEASON_ORDER = ['Full', 'Spring', 'Summer', 'Fall', 'Winter'];
 
 function compareSeasons(a, b) {
   const ai = SEASON_ORDER.indexOf(a);

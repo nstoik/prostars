@@ -1,4 +1,4 @@
-FROM python:3.14 AS dev-stage
+FROM python:3.15 AS dev-stage
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
